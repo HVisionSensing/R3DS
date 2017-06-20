@@ -1,51 +1,48 @@
 #ifndef OBJLOADER_H
 #define OBJLOADER_H
 
-#include <QMainWindow>
-#include <QFileDialog>
-#include <QVector3D>
+#include <QString>
+#include <QFile>
+#include <QDebug>
 #include <QVector>
+#include <QVector3D>
+#include <QStringList>
 
-struct Polygon{
-    QVector<int> vertex;
-    QVector<int> vertexTexture;
-    QVector<int> normals;
-    Polygon(QVector<int> normals, QVector<int> vertex, QVector<int> vertexTexture){
-        this->normals = normals;
-        this->vertex = vertex;
-        this->vertexTexture = vertexTexture;
-    }
-};
-
-namespace Ui {
-class ObjLoader;
-}
-
-class ObjLoader : public QMainWindow
+class Obj_loader
 {
-    Q_OBJECT
+public:
+    static Obj_loader& Instance()
+    {
+        static Obj_loader objLoader;
+        return objLoader;
+    }
+
+    bool isReadFile(QFile &file);
+    bool isblank(const QChar &ch);
+    void loadObjFile(QString fileName);
+    void readLine(const QString &line);
+    void listShow(const QVector<QVector3D> &list);
+    QString getCorrectLine(const QString &line);
+    QVector3D readVertices(const QString &line);
+    QVector3D readNormals(const QString &line);
+    QVector3D readTextures(const QString &line);
 
 public:
-    explicit ObjLoader(QWidget *parent = 0);
-    ~ObjLoader();
-
-private slots:
-    void on_actionopen_triggered();
-    void ObjReader();
-    void LineReader(char *line);
-    void OutInConsole(QVector<QVector3D*> out);
-    void OutPolygonInConsole(QVector<Polygon*> outF);
+    QVector<QVector3D> verticesList;
+    QVector<QVector3D> normalsList;
+    QVector<QVector3D> texturesList;
 
 private:
-    Ui::ObjLoader *ui;
+    Obj_loader() {}
+    ~Obj_loader() {}
 
-    QString objWay;
-    QFile objFile;
-    QVector<QVector3D*> vertex;
-    QVector<QVector3D*> vertexTexture;
-    QVector<QVector3D*> normals;
-    QVector<Polygon*> faces;
+    // необходимо также запретить копирование
+    Obj_loader(Obj_loader const&) = delete; // реализация не нужна
+    Obj_loader& operator = (Obj_loader const&) = delete; // и тут
 
+private:
+    bool isNormals = false;
+    bool isTextures = false;
 };
 
 #endif // OBJLOADER_H

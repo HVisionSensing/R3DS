@@ -1,106 +1,114 @@
-#include "objloader.h"
-#include "ui_objloader.h"
-#include <QDebug>
-#include <algorithm>
+#include <objloader.h>
 
-ObjLoader::ObjLoader(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::ObjLoader)
+void Obj_loader::loadObjFile(QString fileName)
 {
-    ui->setupUi(this);
+    QFile object;
+    object.setFileName(fileName);
+
+    if(isReadFile(object))
+        while(!object.atEnd())
+            readLine(object.readLine());
+
+    object.close();
 }
 
-ObjLoader::~ObjLoader()
+bool Obj_loader::isReadFile(QFile &file)
 {
-    delete ui;
+    if(file.open(QIODevice::ReadOnly))
+    {
+        return true;
+    }
+    return true;
 }
 
-void ObjLoader::on_actionopen_triggered()
+void Obj_loader::readLine(const QString &line)
 {
-    objWay = QFileDialog::getOpenFileName(this, "Open Dialog", "", "");
-    objFile.setFileName(objWay);
-    ObjReader();
-    OutInConsole(vertex);
-    OutInConsole(vertexTexture);
-    OutInConsole(normals);
-    OutPolygonInConsole(faces);
+    if(line.at(0) == 'v' && line.at(1) == ' ')
+        verticesList.push_back(readVertices(getCorrectLine(line)));
+    if(line.at(0) == 'v' && line.at(1) == 'n')
+        normalsList.push_back(readVertices(getCorrectLine(line)));
+    if(line.at(0) == 'v' && line.at(1) == 't')
+        texturesList.push_back(readVertices(getCorrectLine(line)));
 }
 
-void ObjLoader::ObjReader()
+QString Obj_loader::getCorrectLine(const QString &line)
 {
-    if (objFile.open(QFile::ReadOnly)) {
-        char line[256];
-        while (!objFile.atEnd()){
-            objFile.readLine(line, sizeof(line));
-            LineReader(line);
+    QString new_line;
+
+    for(int i = 0; i < line.size(); ++i)
+    {
+        if(isblank(line.at(i)))
+        {
+            new_line.push_back(' ');
         }
+        else
+            new_line.push_back(line.at(i));
     }
-    objFile.close();
+
+    return new_line;
 }
 
-void ObjLoader::LineReader(char *line)
+bool Obj_loader::isblank(const QChar &ch)
 {
-    if (line[0] == 'v' && line[1] == ' ') {
-        float x, y, z;
-        sscanf(line, "v %f %f %f", &x, &y, &z);
-
-        vertex.push_back(new QVector3D(x, y, z));
-    }
-    else if (line[0] == 'v' && line[1] == 'n') {
-        float x, y, z;
-        sscanf(line, "vn %f %f %f", &x, &y, &z);
-
-        normals.push_back(new QVector3D(x, y, z));
-    }
-    else if (line[0] == 'v' && line[1] == 't') {
-        float x, y, z;
-        sscanf(line, "vt %f %f %f", &x, &y, &z);
-
-        vertexTexture.push_back(new QVector3D(x, y, z));
-    }
-    else if (line[0] == 'f' && line[1] == ' ') {
-        QString lineStr(line);
-        int countOfVertex;
-        countOfVertex = std::count(lineStr.begin(), lineStr.end(),' ') - 1;
-
-        QVector<int> vertex(countOfVertex);
-        QVector<int> vertexTexture(countOfVertex);
-        QVector<int> normal(countOfVertex);
-
-        if (countOfVertex == 4){
-            sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &vertex[0], &vertexTexture[0], &normal[0], &vertex[1], &vertexTexture[1], &normal[1],
-                   &vertex[2], &vertexTexture[2], &normal[2], &vertex[3], &vertexTexture[3], &normal[3]);
-        }
-        if (countOfVertex == 3){
-            sscanf(line, "f %d/%d/%d %d/%d/%d %d/%d/%d", &vertex[0], &vertexTexture[0], &normal[0], &vertex[1], &vertexTexture[1], &normal[1],
-                   &vertex[2], &vertexTexture[2], &normal[2]);
-        }
-
-        faces.push_back(new Polygon(normal, vertex, vertexTexture));
-    }
+    return (ch == ' ' || ch == '\r' || ch == '\n');
 }
 
-void ObjLoader::OutInConsole(QVector<QVector3D*> out)
+QVector3D Obj_loader::readVertices(const QString &line)
 {
-    foreach (QVector3D* v, out) {
-        qDebug() << v->x() << v->y() << v->z();
-    }
-    qDebug() << out.size();
+    QStringList list;
+    QVector3D vert;
+
+    list = line.split(' ', QString::SkipEmptyParts);
+
+    //0 1 2 3
+    //v 1 2 3
+    vert.setX(list.at(1).toFloat());
+    vert.setY(list.at(2).toFloat());
+    vert.setZ(list.at(3).toFloat());
+
+    return vert;
 }
 
-void ObjLoader::OutPolygonInConsole(QVector<Polygon*> outF)
+QVector3D Obj_loader::readNormals(const QString &line)
 {
-    foreach (Polygon* f, outF) {
-        if (f->vertex.size() == 3)
-            qDebug() << f->vertex.at(0) << "/" << f->vertexTexture.at(0) << "/" << f->normals.at(0) << " "
-                     << f->vertex.at(1) << "/" << f->vertexTexture.at(1) << "/" << f->normals.at(1) << " "
-                     << f->vertex.at(2) << "/" << f->vertexTexture.at(2) << "/" << f->normals.at(2) << " ";
-        if (f->vertex.size() == 4)
-            qDebug() << f->vertex.at(0) << "/" << f->vertexTexture.at(0) << "/" << f->normals.at(0) << " "
-                     << f->vertex.at(1) << "/" << f->vertexTexture.at(1) << "/" << f->normals.at(1) << " "
-                     << f->vertex.at(2) << "/" << f->vertexTexture.at(2) << "/" << f->normals.at(2) << " "
-                     << f->vertex.at(3) << "/" << f->vertexTexture.at(3) << "/" << f->normals.at(3) << " ";
-    }
-    qDebug() << outF.size();
+    isNormals = true;
+
+    QStringList list;
+    QVector3D norm;
+
+    list = line.split(' ', QString::SkipEmptyParts);
+
+    //0 1 2 3
+    //vn 1 2 3
+    norm.setX(list.at(1).toFloat());
+    norm.setY(list.at(2).toFloat());
+    norm.setZ(list.at(3).toFloat());
+
+    return norm;
 }
 
+QVector3D Obj_loader::readTextures(const QString &line)
+{
+    isTextures = true;
+
+    QStringList list;
+    QVector3D tex;
+
+    list = line.split(' ', QString::SkipEmptyParts);
+
+    //0 1 2 3
+    //vt 1 2 3
+    tex.setX(list.at(1).toFloat());
+    tex.setY(list.at(2).toFloat());
+    tex.setZ(list.at(3).toFloat());
+
+    return tex;
+}
+
+void Obj_loader::listShow(const QVector<QVector3D> &list)
+{
+    for (int i = 0; i < list.size(); i++){
+        qDebug() << list.at(i).x() << list.at(i).y() << list.at(i).z();
+    }
+    qDebug() << "size: " << list.size();
+}
