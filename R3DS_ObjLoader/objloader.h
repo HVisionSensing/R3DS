@@ -11,8 +11,7 @@
 class Obj_loader
 {
 public:
-    static Obj_loader& Instance()
-    {
+    static Obj_loader& Instance(){
         static Obj_loader objLoader;
         return objLoader;
     }
@@ -26,14 +25,14 @@ public:
     bool isPolygonLine(const QString &line);
     void loadObjFile(QString fileName);
     void readLine(const QString &line);
-    void listShow(const QVector<QVector3D> &list);
+    void pointShow(const QVector<QVector3D> &list);
+    void polygonShow(QVector<int> &polygonStart);
+    int readFace(const QString &line);
+    int getSizePolygon(QVector<int> &polygonStart, int indexPolygon);
     QString getCorrectLine(const QString &line);
     QVector3D readVertices(const QString &line);
     QVector3D readNormals(const QString &line);
     QVector3D readTextures(const QString &line);
-    int readFace(const QString &line);
-    int getSizePolygon(QVector<int> &polygonStart, int indexPolygon);
-    void show();
 
 public:
     QVector<QVector3D> verticesList;

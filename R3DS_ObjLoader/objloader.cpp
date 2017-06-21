@@ -14,10 +14,8 @@ void Obj_loader::loadObjFile(QString fileName)
 
 bool Obj_loader::isReadFile(QFile &file)
 {
-    if(file.open(QIODevice::ReadOnly))
-    {
+    if (file.open(QIODevice::ReadOnly))
         return true;
-    }
     return false;
 }
 
@@ -35,16 +33,14 @@ void Obj_loader::readLine(const QString &line)
 
 bool Obj_loader::isPolygonLine(const QString &line)
 {
-    if(line.at(0) == 'f' && line.at(1) == ' '){
-
+    if (line.at(0) == 'f' && line.at(1) == ' ')
         return true;
-    }
     return false;
 }
 
 bool Obj_loader::isVerticesLine(const QString &line)
 {
-    if(line.at(0) == 'v' && line.at(1) == ' ' && isGoodCoordinates(line))
+    if (line.at(0) == 'v' && line.at(1) == ' ' && isGoodCoordinates(line))
         return true;
     return false;
 }
@@ -67,16 +63,13 @@ QString Obj_loader::getCorrectLine(const QString &line)
 {
     QString new_line;
 
-    for(int i = 0; i < line.size(); ++i)
-    {
-        if(isblank(line.at(i)))
-        {
+    for (int i = 0; i < line.size(); ++i){
+        if (isblank(line.at(i))){
             new_line.push_back(' ');
         }
         else
             new_line.push_back(line.at(i));
     }
-
     return new_line;
 }
 
@@ -89,7 +82,7 @@ bool Obj_loader::isGoodCoordinates(const QString &line)
 {
     QStringList list;
     list = line.split(' ', QString::SkipEmptyParts);
-    if(list.size() != 4)
+    if (list.size() != 4)
         return false;
     return true;
 }
@@ -150,14 +143,14 @@ QVector3D Obj_loader::readTextures(const QString &line)
 int Obj_loader::readFace(const QString &line)
 {
     QStringList list;
-    if(polygonStart.size() == 0)
+    if (polygonStart.size() == 0)
         polygonStart.push_front(0);
 
     list = line.split(' ', QString::SkipEmptyParts);
 
-    if(isNormals && isTextures){
+    if (isNormals && isTextures){
         QStringList value;
-        for(int i = 1; i < list.size(); i++){
+        for (int i = 1; i < list.size(); i++){
             value = list.at(i).split('/', QString::SkipEmptyParts);
 
             indexVertices.push_back(value.at(0).toInt()-1);
@@ -166,9 +159,9 @@ int Obj_loader::readFace(const QString &line)
         }
     }
 
-    if(!isNormals && isTextures){
+    if (!isNormals && isTextures){
         QStringList value;
-        for(int i = 1; i < list.size(); i++){
+        for (int i = 1; i < list.size(); i++){
             value = list.at(i).split('/', QString::SkipEmptyParts);
 
             indexVertices.push_back(value.at(0).toInt()-1);
@@ -176,9 +169,9 @@ int Obj_loader::readFace(const QString &line)
         }
     }
 
-    if(isNormals && !isTextures){
+    if (isNormals && !isTextures){
         QStringList value;
-        for(int i = 1; i < list.size(); i++){
+        for (int i = 1; i < list.size(); i++){
             value = list.at(i).split('/', QString::SkipEmptyParts);
 
             indexVertices.push_back(value.at(0).toInt()-1);
@@ -186,9 +179,9 @@ int Obj_loader::readFace(const QString &line)
         }
     }
 
-    if(!isNormals && !isTextures){
+    if (!isNormals && !isTextures){
         QStringList value;
-        for(int i = 1; i < list.size(); i++){
+        for (int i = 1; i < list.size(); i++){
             value = list.at(i).split('/', QString::SkipEmptyParts);
 
             indexVertices.push_back(value.at(0).toInt()-1);
@@ -197,8 +190,7 @@ int Obj_loader::readFace(const QString &line)
     return polygonStart.at(polygonStart.size()-1) + list.size()-1;
 }
 
-
-void Obj_loader::listShow(const QVector<QVector3D> &list)
+void Obj_loader::pointShow(const QVector<QVector3D> &list)
 {
     for (int i = 0; i < list.size(); i++){
         qDebug() << list.at(i).x() << list.at(i).y() << list.at(i).z();
@@ -213,24 +205,24 @@ int Obj_loader::getSizePolygon(QVector<int> &polygonStart, int indexPolygon)
     return polygonStart.at(polygonStart.size()-1)-polygonStart.at(indexPolygon);
 }
 
-void Obj_loader::show()
+void Obj_loader::polygonShow(QVector<int> &polygonStart)
 {
-    for(int i = 0; i < polygonStart.size()-1; i++){
+    for (int i = 0; i < polygonStart.size()-1; i++){
         QString str = "f ";
-        if(isNormals && isTextures)
-            for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
+        if (isNormals && isTextures)
+            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
             }
-        if(!isNormals && isTextures)
+        if (!isNormals && isTextures)
             for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + " ";
             }
-        if(isNormals && !isTextures)
-            for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
+        if (isNormals && !isTextures)
+            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
             }
-        if(!isNormals && !isTextures)
-            for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
+        if (!isNormals && !isTextures)
+            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + " ";
             }
         qDebug() << str;

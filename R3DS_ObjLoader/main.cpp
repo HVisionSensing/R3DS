@@ -10,9 +10,10 @@ int main(int argc, char *argv[])
 
     objLoader.loadObjFile("D:\\Test_Vert_Text_Norm.obj");
 
-    objLoader.listShow(objLoader.verticesList);
-    objLoader.listShow(objLoader.normalsList);
-    objLoader.listShow(objLoader.texturesList);
-    objLoader.show();
+    objLoader.pointShow(objLoader.verticesList);
+    objLoader.pointShow(objLoader.normalsList);
+    objLoader.pointShow(objLoader.texturesList);
+    objLoader.polygonShow(objLoader.polygonStart);
+
     return a.exec();
 }
