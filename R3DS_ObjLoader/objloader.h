@@ -19,6 +19,11 @@ public:
 
     bool isReadFile(QFile &file);
     bool isblank(const QChar &ch);
+    bool isVerticesLine(const QString &line);
+    bool isNormalsLine(const QString &line);
+    bool isTexturesLine(const QString &line);
+    bool isGoodCoordinates(const QString &line);
+    bool isPolygonLine(const QString &line);
     void loadObjFile(QString fileName);
     void readLine(const QString &line);
     void listShow(const QVector<QVector3D> &list);
@@ -26,11 +31,19 @@ public:
     QVector3D readVertices(const QString &line);
     QVector3D readNormals(const QString &line);
     QVector3D readTextures(const QString &line);
+    int readFace(const QString &line);
+    int getSizePolygon(QVector<int> &polygonStart, int indexPolygon);
+    void show();
 
 public:
     QVector<QVector3D> verticesList;
     QVector<QVector3D> normalsList;
     QVector<QVector3D> texturesList;
+
+    QVector<int> polygonStart;
+    QVector<int> indexVertices;
+    QVector<int> indexNormals;
+    QVector<int> indexTextures;
 
 private:
     Obj_loader() {}
@@ -41,8 +54,8 @@ private:
     Obj_loader& operator = (Obj_loader const&) = delete; // и тут
 
 private:
-    bool isNormals = false;
-    bool isTextures = false;
+    bool isNormals;
+    bool isTextures;
 };
 
 #endif // OBJLOADER_H

@@ -6,15 +6,13 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
-    Obj_loader& objLoaderInstance = Obj_loader::Instance();
+    Obj_loader& objLoader = Obj_loader::Instance();
 
-    objLoaderInstance.loadObjFile("D:\\test.obj");
+    objLoader.loadObjFile("D:\\Test_Vert_Text_Norm.obj");
 
-    objLoaderInstance.listShow(objLoaderInstance.verticesList);
-    objLoaderInstance.listShow(objLoaderInstance.normalsList);
-    objLoaderInstance.listShow(objLoaderInstance.texturesList);
-
-
-
+    objLoader.listShow(objLoader.verticesList);
+    objLoader.listShow(objLoader.normalsList);
+    objLoader.listShow(objLoader.texturesList);
+    objLoader.show();
     return a.exec();
 }
