@@ -16,6 +16,7 @@ bool Obj_loader::isReadFile(QFile &file)
 {
     if (file.open(QIODevice::ReadOnly))
         return true;
+    qDebug() << "Error read file";
     return false;
 }
 

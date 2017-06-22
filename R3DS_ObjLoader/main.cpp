@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 
     Obj_loader& objLoader = Obj_loader::Instance();
 
-    objLoader.loadObjFile("D:\\Test_Vert_Text_Norm.obj");
+    objLoader.loadObjFile("D:\\test.obj");
 
     objLoader.pointShow(objLoader.verticesList);
     objLoader.pointShow(objLoader.normalsList);
