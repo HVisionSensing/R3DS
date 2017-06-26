@@ -12,6 +12,7 @@ public:
 private slots:
     void testIsVertexLine01();
     void testIsPolygonLine();
+    void testReadPoint3D();
 };
 
 #endif // OBJLOADERTESTS_H

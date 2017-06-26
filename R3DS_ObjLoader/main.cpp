@@ -23,5 +23,4 @@ int main(int argc, char *argv[])
     objLoader.polygonShow();
 
     runTests();
-    //return a.exec();
 }

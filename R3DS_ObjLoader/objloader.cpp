@@ -1,11 +1,38 @@
 #include <objloader.h>
 
-void ObjLoader::loadObjFile(QString fileName)
+void ObjLoader::loadObjFile(QString file)
 {   
-    QFile object;
-    object.setFileName(fileName);
+    QRegExp isPath("^(.+):(\\.*)*(\\.*).(.*)$");
 
-    loadObjFile(object);
+    if (!isPath.exactMatch(file)){
+        QFile object("Obj.txt");
+        objStringToFile(file, object);
+
+        loadObjFile(object);
+    }
+    else {
+        QFile object;
+        object.setFileName(file);
+
+        loadObjFile(object);
+    }
+}
+
+
+
+void ObjLoader::objStringToFile(const QString &fileString, QFile &file)
+{
+    QStringList list = fileString.split("\n", QString::SkipEmptyParts);
+
+
+    if (file.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&file);
+        for(int i =0; i < list.size(); i++){
+        stream << list.at(i) << endl;
+        }
+    }
+    file.close();
 }
 
 
@@ -46,42 +73,51 @@ void ObjLoader::readLine(const QString &loadLine)
         texturesList.push_back(readPoint3D(line));
 
     if(isPolygonLine(line)){
-        QStringList listWithSlash;
-        QStringList listWithoutSlash;
-        listWithSlash = line.split(' ', QString::SkipEmptyParts);
-
-        polygonStart.push_back(getStartPolygon(polygonStart, line));
-
-        for (int i = 1; i < listWithSlash.size(); i++){
-            listWithoutSlash = listWithSlash.at(i).split('/', QString::SkipEmptyParts);
-            indexVertices.push_back(getVerticesIndex(listWithoutSlash));
-            indexNormals.push_back(getNormalsIndex(listWithoutSlash));
-            indexTextures.push_back(getTexturesIndex(listWithoutSlash));
+        pushPolygon(line, polygonStart, indexVertices, indexNormals, indexTextures, normalsList, texturesList);
         }
+}
+
+
+
+void ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures, QVector<QVector3D> &normalsList, QVector<QVector3D> &texturesList)
+{
+    QStringList listWithSlash;
+    QStringList listWithoutSlash;
+    listWithSlash = line.split(' ', QString::SkipEmptyParts);
+
+    polygonStart.push_back(getStartPolygon(polygonStart, line));
+
+    for (int i = 1; i < listWithSlash.size(); i++){
+        listWithoutSlash = listWithSlash.at(i).split('/', QString::SkipEmptyParts);
+        indexVertices.push_back(getVerticesIndex(listWithoutSlash));
+        indexNormals.push_back(getNormalsIndex(listWithoutSlash, normalsList, texturesList));
+        indexTextures.push_back(getTexturesIndex(listWithoutSlash, texturesList));
     }
 }
 
 
 
-int ObjLoader::getNormalsIndex(const QStringList &value) const
+int ObjLoader::getNormalsIndex(const QStringList &value, const QVector<QVector3D> &normalsList, const QVector<QVector3D> &texturesList)
 {
-    if (isNormals() && isTextures())
+    if (normalsList.size() && texturesList.size())
         return value.at(2).toInt()-1;
-    if (isNormals() && !isTextures())
+    if (normalsList.size() && !texturesList.size())
         return value.at(1).toInt()-1;
     return -1;
 }
 
 
 
-int ObjLoader::getTexturesIndex(const QStringList &value) const
+int ObjLoader::getTexturesIndex(const QStringList &value, const QVector<QVector3D> &texturesList)
 {
-    if (isTextures())
+    if (texturesList.size())
         return value.at(1).toInt()-1;
     return -1;
 }
 
-int ObjLoader::getVerticesIndex(const QStringList &value) const
+
+
+int ObjLoader::getVerticesIndex(const QStringList &value)
 {
     return value.at(0).toInt()-1;
 }
@@ -205,14 +241,16 @@ QVector3D ObjLoader::readPoint3D(const QString &line)
 
 
 
-int ObjLoader::getSizePolygon(QVector<int> &polygonStart, int indexPolygon)
+int ObjLoader::getSizePolygon(const QVector<int> &polygonStart, const int indexPolygon)
 {
     if ((indexPolygon+1) < polygonStart.size()-1)
         return polygonStart.at(indexPolygon+1)-polygonStart.at(indexPolygon);
     return polygonStart.at(polygonStart.size()-1)-polygonStart.at(indexPolygon);
 }
 
-int ObjLoader::getStartPolygon(QVector<int> &polygonStart, QString &line)
+
+
+int ObjLoader::getStartPolygon(const QVector<int> &polygonStart, const QString &line)
 {
     QStringList listWithSlash;
     listWithSlash = line.split(' ', QString::SkipEmptyParts);
@@ -220,20 +258,6 @@ int ObjLoader::getStartPolygon(QVector<int> &polygonStart, QString &line)
     if (polygonStart.size() == 0)
         return polygonStart.size();
     return (polygonStart.at(polygonStart.size()-1) + listWithSlash.size()-1);
-}
-
-
-
-bool ObjLoader::isNormals() const
-{
-    return normalsList.size();
-}
-
-
-
-bool ObjLoader::isTextures() const
-{
-    return texturesList.size();
 }
 
 
@@ -252,19 +276,19 @@ void ObjLoader::polygonShow()
 {
     for (int i = 0; i < polygonStart.size()-1; i++){
         QString str = "f ";
-        if (isNormals() && isTextures())
+        if (normalsList.size() && texturesList.size())
             for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
             }
-        if (!isNormals() && isTextures())
+        if (!normalsList.size() && texturesList.size())
             for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + " ";
             }
-        if (isNormals() && !isTextures())
+        if (normalsList.size() && !texturesList.size())
             for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
             }
-        if (!isNormals() && !isTextures())
+        if (!normalsList.size() && !texturesList.size())
             for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
                 str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + " ";
             }
