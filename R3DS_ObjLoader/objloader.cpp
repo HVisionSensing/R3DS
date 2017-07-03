@@ -1,7 +1,7 @@
 #include <objloader.h>
 
 void ObjLoader::loadObjFile(QString file)
-{   
+{
     QRegExp isPath("^(.+):(\\.*)*(\\.*).(.*)$");
 
     if (!isPath.exactMatch(file)){
@@ -25,7 +25,7 @@ void ObjLoader::objStringToFile(const QString &fileString, QFile &file)
     QStringList list = fileString.split("\n", QString::SkipEmptyParts);
 
 
-    if (file.open(QIODevice::WriteOnly))
+    if (file.open(QIODevice::ReadOnly))
     {
         QTextStream stream(&file);
         for(int i =0; i < list.size(); i++){
@@ -74,7 +74,103 @@ void ObjLoader::readLine(const QString &loadLine)
 
     if(isPolygonLine(line)){
         pushPolygon(line, polygonStart, indexVertices, indexNormals, indexTextures, normalsList, texturesList);
+    }
+}
+
+
+
+void ObjLoader::saveFile(QString fileWay, QVector<QVector3D> &verticesList, QVector<QVector3D> &normalsList, QVector<QVector3D> &texturesList,
+                         QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures)
+{
+    QFile fileSaved(fileWay);
+    if (fileSaved.open(QIODevice::WriteOnly | QIODevice::Text)){
+        QTextStream WriteStream(&fileSaved);
+
+        if (verticesList.size()){
+            for (int i = 0; i < verticesList.size(); i++){
+                WriteStream << "v " << verticesList.at(i).x() << ' ' << verticesList.at(i).y() << ' ' << verticesList.at(i).z() << "\n";
+            }
+
+            WriteStream << "# " << verticesList.size() << " vertices" << "\n";
+            WriteStream << "\n";
         }
+
+        if (normalsList.size()){
+            for (int i = 0; i < normalsList.size(); i++){
+                WriteStream << "vn " << normalsList.at(i).x() << ' ' << normalsList.at(i).y() << ' ' << normalsList.at(i).z() << "\n";
+            }
+
+            WriteStream << "# " << normalsList.size() << " vertex normals" << "\n";
+            WriteStream << "\n";
+        }
+
+        if (texturesList.size()){
+            for (int i = 0; i < texturesList.size(); i++){
+                WriteStream << "vt " << texturesList.at(i).x() << ' ' << texturesList.at(i).y() << ' ' << texturesList.at(i).z() << "\n";
+            }
+
+            WriteStream << "# " << texturesList.size() << " vertex normals" << "\n";
+            WriteStream << "\n";
+        }
+
+        if (indexVertices.size() && indexTextures.size() && indexNormals.size()){
+            for (int i = 0; i < indexVertices.size(); i+=3){
+                WriteStream << "f " << indexVertices.at(i) << '/' << indexTextures.at(i) << '/' << indexNormals.at(i)
+                            << ' '
+                            << indexVertices.at(i+1) << '/' << indexTextures.at(i+1) << '/' << indexNormals.at(i+1)
+                            << ' '
+                            << indexVertices.at(i+2) << '/' << indexTextures.at(i+2) << '/' << indexNormals.at(i+2)
+                            << "\n";
+            }
+
+            WriteStream << "# " << indexVertices.size()/3 << " polygons" << "\n";
+            WriteStream << "\n";
+        }
+
+        if (indexVertices.size() && indexTextures.size() && !indexNormals.size()){
+            for (int i = 0; i < indexVertices.size(); i+=3){
+                WriteStream << "f " << indexVertices.at(i) << '/' << indexTextures.at(i)
+                            << ' '
+                            << indexVertices.at(i+1) << '/' << indexTextures.at(i+1)
+                            << ' '
+                            << indexVertices.at(i+2) << '/' << indexTextures.at(i+2)
+                            << "\n";
+            }
+
+            WriteStream << "# " << indexVertices.size()/3 << " polygons" << "\n";
+            WriteStream << "\n";
+        }
+
+        if (indexVertices.size() && !indexTextures.size() && indexNormals.size()){
+            for (int i = 0; i < indexVertices.size(); i+=3){
+                WriteStream << "f " << indexVertices.at(i) << '/' << indexNormals.at(i)
+                            << ' '
+                            << indexVertices.at(i+1) << '/' << indexNormals.at(i+1)
+                            << ' '
+                            << indexVertices.at(i+2) << '/' << indexNormals.at(i+2)
+                            << "\n";
+            }
+
+            WriteStream << "# " << indexVertices.size()/3 << " polygons" << "\n";
+            WriteStream << "\n";
+        }
+
+        if (indexVertices.size() && !indexTextures.size() && !indexNormals.size()){
+            for (int i = 0; i < indexVertices.size(); i+=3){
+                WriteStream << "f " << indexVertices.at(i)
+                            << ' '
+                            << indexVertices.at(i+1)
+                            << ' '
+                            << indexVertices.at(i+2)
+                            << "\n";
+            }
+
+            WriteStream << "# " << indexVertices.size()/3 << " polygons" << "\n";
+            WriteStream << "\n";
+        }
+
+        fileSaved.close();
+    }
 }
 
 
@@ -85,13 +181,20 @@ void ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVe
     QStringList listWithoutSlash;
     listWithSlash = line.split(' ', QString::SkipEmptyParts);
 
-    polygonStart.push_back(getStartPolygon(polygonStart, line));
-
+    if (polygonStart.size() == 0){
+       polygonStart.push_back(polygonStart.size());
+       polygonStart.push_back(listWithSlash.size()-1);
+    }
+    else{
+        polygonStart.push_back(polygonStart.at(polygonStart.size()-1) + listWithSlash.size()-1);
+    }
     for (int i = 1; i < listWithSlash.size(); i++){
         listWithoutSlash = listWithSlash.at(i).split('/', QString::SkipEmptyParts);
-        indexVertices.push_back(getVerticesIndex(listWithoutSlash));
-        indexNormals.push_back(getNormalsIndex(listWithoutSlash, normalsList, texturesList));
-        indexTextures.push_back(getTexturesIndex(listWithoutSlash, texturesList));
+         indexVertices.push_back(getVerticesIndex(listWithoutSlash));
+         if (normalsList.size())
+             indexNormals.push_back(getNormalsIndex(listWithoutSlash, normalsList, texturesList));
+         if (texturesList.size())
+             indexTextures.push_back(getTexturesIndex(listWithoutSlash, texturesList));
     }
 }
 
@@ -100,9 +203,9 @@ void ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVe
 int ObjLoader::getNormalsIndex(const QStringList &value, const QVector<QVector3D> &normalsList, const QVector<QVector3D> &texturesList)
 {
     if (normalsList.size() && texturesList.size())
-        return value.at(2).toInt()-1;
+        return value.at(2).toInt();
     if (normalsList.size() && !texturesList.size())
-        return value.at(1).toInt()-1;
+        return value.at(1).toInt();
     return -1;
 }
 
@@ -111,7 +214,7 @@ int ObjLoader::getNormalsIndex(const QStringList &value, const QVector<QVector3D
 int ObjLoader::getTexturesIndex(const QStringList &value, const QVector<QVector3D> &texturesList)
 {
     if (texturesList.size())
-        return value.at(1).toInt()-1;
+        return value.at(1).toInt();
     return -1;
 }
 
@@ -119,7 +222,7 @@ int ObjLoader::getTexturesIndex(const QStringList &value, const QVector<QVector3
 
 int ObjLoader::getVerticesIndex(const QStringList &value)
 {
-    return value.at(0).toInt()-1;
+    return value.at(0).toInt();
 }
 
 
@@ -244,56 +347,39 @@ QVector3D ObjLoader::readPoint3D(const QString &line)
 int ObjLoader::getSizePolygon(const QVector<int> &polygonStart, const int indexPolygon)
 {
     if ((indexPolygon+1) < polygonStart.size()-1)
-        return polygonStart.at(indexPolygon+1)-polygonStart.at(indexPolygon);
+            return polygonStart.at(indexPolygon+1)-polygonStart.at(indexPolygon);
     return polygonStart.at(polygonStart.size()-1)-polygonStart.at(indexPolygon);
 }
 
 
 
-int ObjLoader::getStartPolygon(const QVector<int> &polygonStart, const QString &line)
+QVector<int> ObjLoader::triangulation(QVector<int> &index, QVector<int> &polygonStart)
 {
-    QStringList listWithSlash;
-    listWithSlash = line.split(' ', QString::SkipEmptyParts);
+    QVector<int> indexNew;
 
-    if (polygonStart.size() == 0)
-        return polygonStart.size();
-    return (polygonStart.at(polygonStart.size()-1) + listWithSlash.size()-1);
-}
-
-
-
-void ObjLoader::pointShow(const QVector<QVector3D> &list)
-{
-    for (int i = 0; i < list.size(); i++){
-        qDebug() << list.at(i).x() << list.at(i).y() << list.at(i).z();
-    }
-    qDebug() << "size: " << list.size();
-}
-
-
-
-void ObjLoader::polygonShow()
-{
     for (int i = 0; i < polygonStart.size()-1; i++){
-        QString str = "f ";
-        if (normalsList.size() && texturesList.size())
-            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
-                str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
-            }
-        if (!normalsList.size() && texturesList.size())
-            for(int j = 0; j < getSizePolygon(polygonStart, i); j++){
-                str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexTextures.at(polygonStart.at(i)+j)) + " ";
-            }
-        if (normalsList.size() && !texturesList.size())
-            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
-                str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + "/" + QString::number(indexNormals.at(polygonStart.at(i)+j)) + " ";
-            }
-        if (!normalsList.size() && !texturesList.size())
-            for (int j = 0; j < getSizePolygon(polygonStart, i); j++){
-                str += QString::number(indexVertices.at(polygonStart.at(i)+j)) + " ";
-            }
-        qDebug() << str;
-    }
-    qDebug() << "Size: " << polygonStart.size();
-}
 
+        if (getSizePolygon(polygonStart, i) > 3){
+
+            QVector<int> support;
+
+            for (int l = 0; l < getSizePolygon(polygonStart, i); l++){
+                support.push_back(index.at(polygonStart.at(i)+l));
+            }
+
+            while(support.size() > 2){
+                for (int j = 0; j < 3; j++){
+                    indexNew.push_back(support.at(j));
+                }
+                support.remove(1);
+            }
+        }
+        else {
+            for (int j = polygonStart.at(i); j < polygonStart.at(i) + 3; j++){
+            indexNew.push_back(index.at(j));
+            }
+        }
+    }
+
+    return indexNew;
+}
