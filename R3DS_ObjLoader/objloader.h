@@ -37,8 +37,8 @@ public:
     static QVector2D readPoint2D(const QString &line);
     static QString getCorrectLine(const QString &line);
     static int getSizePolygon(const QVector<int> &polygonStart, const int indexPolygon);
-    static void pushPolygon(const QString &line, QVector<int> &polygonStart, QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures,
-                            QVector<QVector3D> &normalsList, QVector<QVector2D> &texturesList);
+    static bool pushPolygon(const QString &line, QVector<int> &polygonStart, QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures,
+                            QVector<QVector3D> &normalsList, QVector<QVector2D> &texturesList, QVector<QVector3D> &verticesList);
     static int getVerticesIndex(const QStringList &value);
     static int getNormalsIndex(const QStringList &value, const QVector<QVector2D> &texturesList);
     static int getTexturesIndex(const QStringList &value);

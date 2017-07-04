@@ -80,7 +80,8 @@ bool ObjLoader::readLine(const QString &loadLine)
     if(isPolygonLine(line)){
         if(!isGoodPolygon(line))
             return false;
-        pushPolygon(line, polygonStart, indexVertices, indexNormals, indexTextures, normalsList, texturesList);
+        if (!pushPolygon(line, polygonStart, indexVertices, indexNormals, indexTextures, normalsList, texturesList, verticesList))
+            return false;
     }
 
     return true;
@@ -118,7 +119,7 @@ void ObjLoader::saveFile(QString fileWay, QVector<QVector3D> &verticesList, QVec
                 WriteStream << "vt " << texturesList.at(i).x() << ' ' << texturesList.at(i).y() << "\n";
             }
 
-            WriteStream << "# " << texturesList.size() << " vertex normals" << "\n";
+            WriteStream << "# " << texturesList.size() << " textures" << "\n";
             WriteStream << "\n";
         }
 
@@ -184,7 +185,7 @@ void ObjLoader::saveFile(QString fileWay, QVector<QVector3D> &verticesList, QVec
 
 
 
-void ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures, QVector<QVector3D> &normalsList, QVector<QVector2D> &texturesList)
+bool ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVector<int> &indexVertices, QVector<int> &indexNormals, QVector<int> &indexTextures, QVector<QVector3D> &normalsList, QVector<QVector2D> &texturesList,  QVector<QVector3D> &verticesList)
 {
     QStringList listWithSlash;
     QStringList listWithoutSlash;
@@ -200,12 +201,23 @@ void ObjLoader::pushPolygon(const QString &line, QVector<int> &polygonStart, QVe
 
     for (int pointIndex = 1; pointIndex < listWithSlash.size(); pointIndex++){
         listWithoutSlash = listWithSlash.at(pointIndex).split('/', QString::SkipEmptyParts);
+        if (getVerticesIndex(listWithoutSlash) > verticesList.size())
+            return false;
         indexVertices.push_back(getVerticesIndex(listWithoutSlash));
-        if (normalsList.size())
+
+        if (normalsList.size()){
+            if (getNormalsIndex(listWithoutSlash, texturesList) > normalsList.size())
+                return false;
             indexNormals.push_back(getNormalsIndex(listWithoutSlash, texturesList));
-        if (texturesList.size())
+        }
+        if (texturesList.size()){
+            if (getTexturesIndex(listWithoutSlash) > texturesList.size())
+                return false;
             indexTextures.push_back(getTexturesIndex(listWithoutSlash));
+        }
     }
+
+    return true;
 }
 
 

@@ -51,7 +51,7 @@ void ObjLoaderTests::testLoadStringFile()
                           "vt 1 2 3\n"
                           "vt 1 6 4\n"
                           "vt 6 3 9\n"
-                          "f 1/2 2/3 3/4\n");
+                          "f 1/1 2/3 3/3\n");
 
     QVERIFY(objLoader5.loadStringFile(fileNameTest5));
 
@@ -66,6 +66,18 @@ void ObjLoaderTests::testLoadStringFile()
                           "f 1/2 2/g 3/4\n");
 
     QVERIFY(!objLoader6.loadStringFile(fileNameTest6));
+
+
+    ObjLoader objLoader7;
+    QString fileNameTest7("v 1 2 3\n"
+                          "v 2 3 4\n"
+                          "v 4 5 6\n"
+                          "vt 1 2 3\n"
+                          "vt 1 6 4\n"
+                          "vt 6 3 9\n"
+                          "f 5/6 7/8 9/10\n");
+
+    QVERIFY(!objLoader7.loadStringFile(fileNameTest7));
 }
 
 
