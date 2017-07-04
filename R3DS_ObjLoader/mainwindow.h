@@ -18,7 +18,7 @@ public:
     ~MainWindow();
 
 public:
-    ObjLoader objLoader;
+    ObjLoader *objLoader = NULL;
 
 private slots:
     void on_actionOpen_triggered();
