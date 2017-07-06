@@ -1,5 +1,6 @@
 #include "objloadertests.h"
 #include "objloader.h"
+#include "kdtree.h"
 
 ObjLoaderTests::ObjLoaderTests(QObject *parent) : QObject(parent)
 {
@@ -221,6 +222,63 @@ void ObjLoaderTests::testGetSizePolygon()
 
     QVector<int> polygonStart3 = {0, 10, 30};
     QCOMPARE(ObjLoader::getSizePolygon(polygonStart3, 1), 20);
+}
+
+void ObjLoaderTests::testKdTree()
+{
+//    QVector<QVector3D> list;
+
+//    QVector3D v1(1,6,6);
+//    QVector3D v2(6,3,1);
+//    QVector3D v3(2,4,9);
+//    QVector3D v4(3,12,12);
+//    QVector3D v5(10,24,24);
+//    QVector3D v6(1,8,45);
+//    QVector3D v7(7,4,5);
+//    QVector3D v8(9,2,31);
+//    QVector3D v9(32,54,12);
+//    QVector3D v10(3,162,14);
+//    QVector3D v11(10,24,53);
+//    QVector3D v12(1,7,2);
+
+//    list.push_back(v1);
+//    list.push_back(v2);
+//    list.push_back(v3);
+//    list.push_back(v4);
+//    list.push_back(v5);
+//    list.push_back(v6);
+//    list.push_back(v7);
+//    list.push_back(v8);
+//    list.push_back(v9);
+//    list.push_back(v10);
+//    list.push_back(v11);
+//    list.push_back(v12);
+
+//    Node *node = KdTree::kdTreeBuild(list, 1, 3);
+
+    QVector<QVector3D> listOfPoints;
+
+    QVector3D v21(2,3,6);
+    QVector3D v22(5,4,1);
+    QVector3D v23(9,6,9);
+    QVector3D v24(4,7,12);
+    QVector3D v25(8,1,24);
+    QVector3D v26(7,2,45);
+
+    listOfPoints.push_back(v21);
+    listOfPoints.push_back(v22);
+    listOfPoints.push_back(v23);
+    listOfPoints.push_back(v24);
+    listOfPoints.push_back(v25);
+    listOfPoints.push_back(v26);
+
+    Node *tree = KdTree::kdTreeBuild(listOfPoints, 1, 2);
+
+    QVector3D poin(9, 3, 3);
+    Node *nearPoint = KdTree::NearestNeighborSearch(poin, tree, 1, 3); //8,1
+
+    QVector3D poin2(2, 7, 3);
+    Node *nearPoint2 = KdTree::NearestNeighborSearch(poin2, tree, 1, 3); //4,7
 }
 
 

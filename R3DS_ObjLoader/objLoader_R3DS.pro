@@ -27,12 +27,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     objloader.cpp \
-    objloadertests.cpp
+    objloadertests.cpp \
+    kdtree.cpp
 
 HEADERS += \
         mainwindow.h \
     objloader.h \
-    objloadertests.h
+    objloadertests.h \
+    kdtree.h
 
 FORMS += \
         mainwindow.ui
