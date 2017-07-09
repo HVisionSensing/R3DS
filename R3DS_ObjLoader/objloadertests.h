@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTest>
+#include <QList>
 
 class ObjLoaderTests : public QObject
 {

@@ -1,6 +1,7 @@
 #include "objloadertests.h"
 #include "objloader.h"
 #include "kdtree.h"
+#include "kdtree.h"
 
 ObjLoaderTests::ObjLoaderTests(QObject *parent) : QObject(parent)
 {
@@ -258,12 +259,13 @@ void ObjLoaderTests::testKdTree()
 
     QVector<QVector3D> listOfPoints;
 
-    QVector3D v21(2,3,6);
-    QVector3D v22(5,4,1);
-    QVector3D v23(9,6,9);
-    QVector3D v24(4,7,12);
-    QVector3D v25(8,1,24);
-    QVector3D v26(7,2,45);
+    QVector3D v21(2, 3, 5);
+    QVector3D v22(4, 2, 5);
+    QVector3D v23(6, 5, 5);
+    QVector3D v24(15, 4, 5);
+    QVector3D v25(8, 7, 5);
+    QVector3D v26(5.5, 10, 5);
+    QVector3D v27(9, 12 ,5);
 
     listOfPoints.push_back(v21);
     listOfPoints.push_back(v22);
@@ -271,14 +273,44 @@ void ObjLoaderTests::testKdTree()
     listOfPoints.push_back(v24);
     listOfPoints.push_back(v25);
     listOfPoints.push_back(v26);
+    listOfPoints.push_back(v27);
 
+   // BorderAxis bdX(4, 2);
+    //BorderAxis bdY(6, 2);
+
+    //QList<BorderAxis> bdList;
+   // bdList.push_back(bdX);
+   // bdList.push_back(bdY);
+
+    //QList<BorderAxis> bdTest = KdTreeNew::getBorder(listOfPoints, 2);
+
+    //NodeNew testNode(v21, bdTest, NULL, NULL, true);
+   // QList<BorderAxis> bd = KdTree::getBorder(listOfPoints, 2);
     Node *tree = KdTree::kdTreeBuild(listOfPoints, 1, 2);
 
-    QVector3D poin(9, 3, 3);
-    Node *nearPoint = KdTree::NearestNeighborSearch(poin, tree, 1, 3); //8,1
+    QVector3D point(9, 8, 5);
+    Node *best = KdTree::nearestNeighborSearch(point, tree, 1, 2,-1, tree);
+    QCOMPARE(best->item, v25);
 
-    QVector3D poin2(2, 7, 3);
-    Node *nearPoint2 = KdTree::NearestNeighborSearch(poin2, tree, 1, 3); //4,7
+    QVector3D point2(1, 2, 5);
+    Node *best2 = KdTree::nearestNeighborSearch(point2, tree, 1, 2,-1, tree);
+    QCOMPARE(best2->item, v21);
+
+    QVector3D point3(7, 2, 5);
+    Node *best3 = KdTree::nearestNeighborSearch(point3, tree, 1, 2,-1, tree);
+    QCOMPARE(best3->item, v22);
+
+    QVector3D point4(7, 10, 5);
+    Node *best4 = KdTree::nearestNeighborSearch(point4, tree, 1, 2,-1, tree);
+    QCOMPARE(best4->item, v26);
+
+    QVector3D point5(15, 8, 5);
+    Node *best5 = KdTree::nearestNeighborSearch(point5, tree, 1, 2,-1, tree);
+    QCOMPARE(best5->item, v24);
+
+    QVector3D point6(11, 13, 5);
+    Node *best6 = KdTree::nearestNeighborSearch(point6, tree, 1, 2,-1, tree);
+    QCOMPARE(best6->item, v27);
 }
 
 

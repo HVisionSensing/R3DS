@@ -1,14 +1,35 @@
-#ifndef KDTREE_H
-#define KDTREE_H
+#ifndef KDTREENEW_H
+#define KDTREENEW_H
 
 #include <QVector>
 #include <QVector3D>
+#include <QList>
+#include <QtMath>
 
-struct Node
+struct BorderAxis
 {
+public:
+    float max;
+    float min;
+    float len;
+
+    BorderAxis(float maxInConstruct, float minInConstruct):max(maxInConstruct), min(minInConstruct), len(maxInConstruct-minInConstruct){}
+};
+
+
+
+class Node
+{
+public:
     QVector3D item;
-    Node *left;
-    Node *right;
+    QList<BorderAxis> bord;
+
+    Node *previous = NULL;
+    Node *right = NULL;
+    Node *left = NULL;
+
+    int axis = -1;
+    bool isLeaf;
 };
 
 
@@ -17,12 +38,11 @@ class KdTree
 {
 public:
     static Node *kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension);
-    static Node *NearestNeighborSearch(QVector3D &point, Node *tree, int depth, int dimension);
-    static bool comparsionVectorsX(QVector3D &points1, QVector3D &points2);
-    static bool comparsionVectorsY(QVector3D &points1, QVector3D &points2);
-    static bool comparsionVectorsZ(QVector3D &points1, QVector3D &points2);
+    static QList<BorderAxis> getBorder(QVector<QVector3D> points, int dimension);
+    static Node *nearestNeighborSearch(QVector3D &point, Node *tree, int depth, int dimension, float lenBest, Node *best);
+    static bool comparsionVectorsX(QVector3D &pointsFirst, QVector3D &pointsSecond);
+    static bool comparsionVectorsY(QVector3D &pointsFirst, QVector3D &pointsSecond);
+    static bool comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond);
 };
 
-
-
-#endif // KDTREE_H
+#endif // KDTREENEW_H
