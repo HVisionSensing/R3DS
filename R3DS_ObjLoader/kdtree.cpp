@@ -89,20 +89,9 @@ QList<BorderAxis> KdTree::getBorder(QVector<QVector3D> points, int dimension)
 
 
 
-Node *KdTree::nearestNeighborSearch(QVector3D &point, Node *tree, int depth, int dimension, float lenBest, Node *best)
+void KdTree::nearestNeighborSearch(QVector3D &point, Node *tree, int dimension)
 {
     int axis = tree->axis;
-    Node *bestNode = best;
-    float len = (tree->item.x()-point.x())*(tree->item.x()-point.x()) + (tree->item.y()-point.y())*(tree->item.y()-point.y());
-
-    if (lenBest == -1)
-        lenBest = len;
-    else
-        if (len < lenBest){
-            lenBest = len;
-            bestNode = tree;
-        }
-
 
     bool toLeft = false;
     bool toRight = (tree->right != NULL);
@@ -119,98 +108,58 @@ Node *KdTree::nearestNeighborSearch(QVector3D &point, Node *tree, int depth, int
         if (KdTree::comparsionVectorsZ(point, tree->item) && tree->left != NULL)
             toLeft = true;
 
-    if (toLeft)
-        bestNode = KdTree::nearestNeighborSearch(point, tree->left, depth+1, dimension, lenBest, bestNode);
-    if (toRight)
-        bestNode = KdTree::nearestNeighborSearch(point, tree->right, depth+1, dimension, lenBest, bestNode);
-
-    // НЕ РЕФАКТОРИЛ И НЕ ДОДЕЛАЛ
-
-    if (tree->isLeaf && bestNode == tree){
-
-        Node *nodePrevious = tree->previous;
-        Node *nodeNow = tree;
-        float x = nodePrevious->item.x();
-        float y = nodePrevious->item.y();
-
-        if (((nodePrevious->axis == 0) && (x > point.x()-len) && (point.x()>x)) || ((nodePrevious->axis == 1) && (y > point.y()-len) && (point.y()>y))){
-            if (nodePrevious->left == nodeNow && nodePrevious->right != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, nodePrevious->right, depth+1, dimension, lenBest, bestNode);
-            if (nodePrevious->right == nodeNow && nodePrevious->left != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, nodePrevious->left, depth+1, dimension, lenBest, bestNode);
-        }
-
-        if (((nodePrevious->axis == 0) && (x < point.x()+len) && (point.x()<x ))|| ((nodePrevious->axis == 1) && (y < point.y()+len) && (point.y()<y))){
-            if (nodePrevious->left == nodeNow && nodePrevious->right != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, nodePrevious->right, depth+1, dimension, lenBest, bestNode);
-            if (nodePrevious->right == nodeNow && nodePrevious->left != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, nodePrevious->left, depth+1, dimension, lenBest, bestNode);
-        }
-
-        if (tree->previous->previous != NULL){
-            Node *nodePrevPrevious = tree->previous->previous;
-            Node *nodePrevious = tree->previous;
-            float x = nodePrevPrevious->item.x();
-            float y = nodePrevPrevious->item.y();
-
-            if (((nodePrevPrevious->axis == 0) && (x > point.x()-len) && (point.x()>x)) || ((nodePrevPrevious->axis == 1) && (y > point.y()-len) && (point.y()>y))){
-                if (nodePrevPrevious->left == nodePrevious && nodePrevPrevious->right != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, nodePrevPrevious->right, depth+1, dimension, lenBest, bestNode);
-                if (nodePrevPrevious->right == nodePrevious && nodePrevPrevious->left != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, nodePrevPrevious->left, depth+1, dimension, lenBest, bestNode);
-            }
-
-            if (((nodePrevPrevious->axis == 0) && (x < point.x()+len) && (point.x()<x ))|| ((nodePrevPrevious->axis == 1) && (y < point.y()+len) && (point.y()<y))){
-                if (nodePrevPrevious->left == nodePrevious && nodePrevPrevious->right != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, nodePrevPrevious->right, depth+1, dimension, lenBest, bestNode);
-                if (nodePrevPrevious->right == nodePrevious && nodePrevPrevious->left != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, nodePrevPrevious->left, depth+1, dimension, lenBest, bestNode);
-            }
-        }
+    if (toLeft){
+       nearestNeighborSearch(point, tree->left, dimension);
+    }
+    else if (toRight){
+       nearestNeighborSearch(point, tree->right, dimension);
     }
 
-    if (!(tree->isLeaf) && bestNode == tree){
-        Node *node = tree;
-        float x = node->item.x();
-        float y = node->item.y();
-
-        if (((node->axis == 0) && (x > point.x()-len) && (point.x()>x)) || ((node->axis == 1) && (y > point.y()-len) && (point.y()>y))){
-            if (node->right != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, node->right, depth+1, dimension, lenBest, bestNode);
-            if (node->left != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, node->left, depth+1, dimension, lenBest, bestNode);
-        }
-
-        if (((node->axis == 0) && (x < point.x()+len) && (point.x()<x ))|| ((node->axis == 1) && (y < point.y()+len) && (point.y()<y))){
-            if (node->right != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, node->right, depth+1, dimension, lenBest, bestNode);
-            if (node->left != NULL)
-                bestNode = KdTree::nearestNeighborSearch(point, node->left, depth+1, dimension, lenBest, bestNode);
-        }
-
-        if (tree->previous != NULL){
-            Node *node = tree->previous;
-            float x = node->item.x();
-            float y = node->item.y();
-
-            if (((node->axis == 0) && (x > point.x()-len) && (point.x()>x)) || ((node->axis == 1) && (y > point.y()-len) && (point.y()>y))){
-                if (node->right != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, node->right, depth+1, dimension, lenBest, bestNode);
-                if (node->left != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, node->left, depth+1, dimension, lenBest, bestNode);
-            }
-
-            if (((node->axis == 0) && (x < point.x()+len) && (point.x()<x ))|| ((node->axis == 1) && (y < point.y()+len) && (point.y()<y))){
-                if (node->right != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, node->right, depth+1, dimension, lenBest, bestNode);
-                if (node->left != NULL)
-                    bestNode = KdTree::nearestNeighborSearch(point, node->left, depth+1, dimension, lenBest, bestNode);
-            }
-        }
-
+    if (tree->isLeaf && best == NULL){
+        best = tree;
+        return;
     }
 
-    return bestNode;
+    float minLen = (best->item.x()-point.x())*(best->item.x()-point.x()) + (best->item.y()-point.y())*(best->item.y()-point.y());
+    float len = (tree->item.x()-point.x())*(tree->item.x()-point.x()) + (tree->item.y()-point.y())*(tree->item.y()-point.y());
+
+    if (dimension == 3){
+        minLen = (best->item.x()-point.x())*(best->item.x()-point.x()) + (best->item.y()-point.y())*(best->item.y()-point.y()) + (best->item.z()-point.z())*(best->item.z()-point.z());
+        len = (tree->item.x()-point.x())*(tree->item.x()-point.x()) + (tree->item.y()-point.y())*(tree->item.y()-point.y()) + (tree->item.z()-point.z())*(tree->item.z()-point.z());
+    }
+
+    if (len < minLen){
+        best = tree;
+        minLen = len;
+    }
+
+    if (tree->isLeaf){
+        return;
+    }
+
+    float x = tree->item.x();
+    float y = tree->item.y();
+    float z;
+
+    if (dimension == 3)
+        z = tree->item.z();
+
+    bool intersectionNodePreviousX = ((tree->axis == 0) && (((x > point.x()-minLen) && (point.x()>x)) || ((x < point.x()+minLen) && (point.x()<x))));
+    bool intersectionNodePreviousY = ((tree->axis == 1) && (((y > point.y()-minLen) && (point.y()>y)) || ((y < point.y()+minLen) && (point.y()<y))));
+    bool intersectionNodePreviousZ = false;
+
+    if (dimension == 3)
+        intersectionNodePreviousZ = ((tree->axis == 2) && (((z > point.z()-minLen) && (point.z()>z)) || ((z < point.z()+minLen) && (point.z()<z)) ));
+
+    bool toRightMove = (tree->right != NULL);
+    bool toLeftMove = (tree->left != NULL);
+
+    if (intersectionNodePreviousX || intersectionNodePreviousY || intersectionNodePreviousZ){
+        if (toRightMove)
+           nearestNeighborSearch(point, tree->right, dimension);
+        if (toLeftMove)
+           nearestNeighborSearch(point, tree->left, dimension);
+    }
 }
 
 
