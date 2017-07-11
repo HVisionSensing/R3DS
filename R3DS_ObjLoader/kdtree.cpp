@@ -49,15 +49,11 @@ Node *KdTree::kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension)
         return node;
 
     node->axis = axis;
-    if (pointsUntilMedian.size()){
+    if (pointsUntilMedian.size())
         node->left = KdTree::kdTreeBuild(pointsUntilMedian, depth+1, dimension);
-        node->left->previous = node;
-    }
 
-    if (pointsAfterMedian.size()){
+    if (pointsAfterMedian.size())
         node->right = KdTree::kdTreeBuild(pointsAfterMedian, depth+1, dimension);
-        node->right->previous = node;
-    }
 
     return node;
 }

@@ -24,7 +24,6 @@ public:
     QVector3D item;
     QList<BorderAxis> bord;
 
-    Node *previous = NULL;
     Node *right = NULL;
     Node *left = NULL;
 
@@ -39,7 +38,7 @@ class KdTree
 public:
     static Node *kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension);
     static QList<BorderAxis> getBorder(QVector<QVector3D> points, int dimension);
-    void nearestNeighborSearch(QVector3D &point, Node *tree, int depth, int dimension);
+    void nearestNeighborSearch(QVector3D &point, Node *tree, int dimension);
     static bool comparsionVectorsX(QVector3D &pointsFirst, QVector3D &pointsSecond);
     static bool comparsionVectorsY(QVector3D &pointsFirst, QVector3D &pointsSecond);
     static bool comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond);
