@@ -1,8 +1,42 @@
 #include "kdtree.h"
 
-Node *KdTree::kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension)
+QVector3D KdTree::nearestNeighborSearchBasic(QVector3D point, QVector<QVector3D> &points)
 {
-    QList<BorderAxis> borderAxis = KdTree::getBorder(points, dimension);
+    QVector3D best = points.operator [](0);
+
+    for (int indexPoints = 0; indexPoints < points.size(); indexPoints++)
+        if ((points.at(indexPoints)-point).lengthSquared() < (best-point).lengthSquared())
+            best = points.operator [](indexPoints);
+    return best;
+}
+
+
+
+QVector3D KdTree::nearestNeighborSearchNotBasic(QVector3D point, QVector<QVector3D> &points)
+{
+    Node *tree = KdTree::kdTreeBuild(points);
+    Node *best = NULL;
+    tree->nearestNeighborSearch(point, best);
+    return best->item;
+}
+
+
+
+float KdTree::testingKnn(QVector<QVector3D> &meshFirst, QVector<QVector3D> &meshSecond, std::function<QVector3D(QVector3D, QVector<QVector3D>&)> func)
+{
+    float start = clock();
+    for (int pointIndex = 0; pointIndex < meshFirst.size(); pointIndex++){
+        QVector3D nearPoint = func(meshFirst.operator [](pointIndex), meshSecond);
+    }
+    float end = clock();
+    return (end-start)/CLK_TCK;
+}
+
+
+
+Node *KdTree::kdTreeBuild(QVector<QVector3D> &points)
+{
+    QList<BorderAxis> borderAxis = KdTree::getBorder(points);
 
     int axis = 0;
     float maxLen = borderAxis.at(0).len;
@@ -35,8 +69,10 @@ Node *KdTree::kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension)
     bool isLeaf = true;
 
     for (int indexAxis = 0; indexAxis < borderAxis.size(); indexAxis++)
-        if (borderAxis.at(indexAxis).len != 0)
+        if (borderAxis.at(indexAxis).len != 0){
             isLeaf = false;
+            break;
+        }
 
     if (isLeaf){
         Node *leaf = new Leaf(points.operator [](medianIndex));
@@ -46,10 +82,10 @@ Node *KdTree::kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension)
     Node *left = NULL;
     Node *right = NULL;
     if (pointsUntilMedian.size())
-        left = KdTree::kdTreeBuild(pointsUntilMedian, depth+1, dimension);
+        left = KdTree::kdTreeBuild(pointsUntilMedian);
 
     if (pointsAfterMedian.size())
-        right = KdTree::kdTreeBuild(pointsAfterMedian, depth+1, dimension);
+        right = KdTree::kdTreeBuild(pointsAfterMedian);
 
     Node *node = new Divider(right, left, points.operator [](medianIndex), axis);
     return node;
@@ -57,105 +93,24 @@ Node *KdTree::kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension)
 
 
 
-QList<BorderAxis> KdTree::getBorder(QVector<QVector3D> points, int dimension)
+QList<BorderAxis> KdTree::getBorder(QVector<QVector3D> points)
 {
     QList<BorderAxis> bordList;
 
-    if (dimension == 2 || dimension == 3){
-        std::sort(points.begin(), points.end(), KdTree::comparsionVectorsX);
-        BorderAxis bordX(points.at(points.size()-1).x(), points.at(0).x());
-        bordList.push_back(bordX);
+    std::sort(points.begin(), points.end(), KdTree::comparsionVectorsX);
+    BorderAxis bordX(points.at(points.size()-1).x(), points.at(0).x());
+    bordList.push_back(bordX);
 
-        std::sort(points.begin(), points.end(), KdTree::comparsionVectorsY);
-        BorderAxis bordY(points.at(points.size()-1).y(), points.at(0).y());
-        bordList.push_back(bordY);
-    }
+    std::sort(points.begin(), points.end(), KdTree::comparsionVectorsY);
+    BorderAxis bordY(points.at(points.size()-1).y(), points.at(0).y());
+    bordList.push_back(bordY);
 
-    if (dimension == 3){
-        std::sort(points.begin(), points.end(), KdTree::comparsionVectorsZ);
-        BorderAxis bordZ(points.at(points.size()-1).z(), points.at(0).z());
-        bordList.push_back(bordZ);
-    }
+    std::sort(points.begin(), points.end(), KdTree::comparsionVectorsZ);
+    BorderAxis bordZ(points.at(points.size()-1).z(), points.at(0).z());
+    bordList.push_back(bordZ);
+
 
     return bordList;
-}
-
-
-
-void KdTree::nearestNeighborSearch(QVector3D &point, Node *tree, int dimension, Node *&best)
-{
-    if (tree->isLeaf && best == NULL){
-        best = tree;
-        return;
-    }
-
-    if (!tree->isLeaf){
-        int axis = tree->toDivider()->axis;
-        bool toLeft = false;
-        bool toRight = (tree->toDivider()->right != NULL);
-
-
-        if (axis == 0)
-            if (point.x() < tree->toDivider()->item.x() && tree->toDivider()->left != NULL) // Исправить
-                toLeft = true;
-
-        if (axis == 1)
-            if (point.y() < tree->toDivider()->item.y() && tree->toDivider()->left != NULL)
-                toLeft = true;
-
-        if (dimension == 3 && axis == 2)
-            if (point.z() < tree->toDivider()->item.z() && tree->toDivider()->left != NULL)
-                toLeft = true;
-
-        if (toLeft){
-           nearestNeighborSearch(point, tree->toDivider()->left, dimension, best);
-        }
-        else if (toRight){
-           nearestNeighborSearch(point, tree->toDivider()->right, dimension, best);
-        }
-
-    }
-
-    float minLen = (best->item.x()-point.x())*(best->item.x()-point.x()) + (best->item.y()-point.y())*(best->item.y()-point.y());
-    float len = (tree->item.x()-point.x())*(tree->item.x()-point.x()) + (tree->item.y()-point.y())*(tree->item.y()-point.y());
-
-    if (dimension == 3){
-        minLen = (best->item.x()-point.x())*(best->item.x()-point.x()) + (best->item.y()-point.y())*(best->item.y()-point.y()) + (best->item.z()-point.z())*(best->item.z()-point.z());
-        len = (tree->item.x()-point.x())*(tree->item.x()-point.x()) + (tree->item.y()-point.y())*(tree->item.y()-point.y()) + (tree->item.z()-point.z())*(tree->item.z()-point.z());
-    }
-
-    if (len < minLen){
-        best = tree;
-        minLen = len;
-    }
-
-    if (tree->isLeaf){
-        return;
-    }
-
-    float x = tree->item.x();
-    float y = tree->item.y();
-    float z;
-
-    if (dimension == 3)
-        z = tree->item.z();
-
-    bool intersectionNodePreviousX = ((tree->toDivider()->axis == 0) && (((x > point.x()-minLen) && (point.x()>x)) || ((x < point.x()+minLen) && (point.x()<x))));
-    bool intersectionNodePreviousY = ((tree->toDivider()->axis == 1) && (((y > point.y()-minLen) && (point.y()>y)) || ((y < point.y()+minLen) && (point.y()<y))));
-    bool intersectionNodePreviousZ = false;
-
-    if (dimension == 3)
-        intersectionNodePreviousZ = ((tree->toDivider()->axis == 2) && (((z > point.z()-minLen) && (point.z()>z)) || ((z < point.z()+minLen) && (point.z()<z)) ));
-
-    bool toRightMove = (tree->toDivider()->right != NULL);
-    bool toLeftMove = (tree->toDivider()->left != NULL);
-
-    if (intersectionNodePreviousX || intersectionNodePreviousY || intersectionNodePreviousZ){
-        if (toRightMove)
-           nearestNeighborSearch(point, tree->toDivider()->right, dimension, best);
-        if (toLeftMove)
-           nearestNeighborSearch(point, tree->toDivider()->left, dimension, best);
-    }
 }
 
 
@@ -179,10 +134,93 @@ bool KdTree::comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond)
 }
 
 
-Node::~Node()
-{
 
+void Leaf::nearestNeighborSearch(QVector3D &point, Node *&best)
+{
+    if (best == NULL){
+        best = this;
+        return;
+    }
+
+    float minLen = (best->item-point).lengthSquared();
+    float len = (item-point).lengthSquared();
+
+    if (len >= minLen)
+        return;
+
+    best = this;
+    minLen = len;
 }
+
+
+
+void Divider::nearestNeighborSearch(QVector3D &point, Node *&best)
+{
+    int axis = this->axis;
+    bool toLeft = false;
+    bool toRight = (right != NULL);
+
+
+    if (axis == 0)
+        if (point.x() < item.x() && left != NULL) // Исправить
+            toLeft = true;
+
+    if (axis == 1)
+        if (point.y() < item.y() && left != NULL)
+            toLeft = true;
+
+    if (axis == 2)
+        if (point.z() < item.z() && left != NULL)
+            toLeft = true;
+
+    if (toLeft){
+       left->nearestNeighborSearch(point, best);
+    }
+    else if (toRight){
+       right->nearestNeighborSearch(point, best);
+    }
+
+    if (best == NULL){
+        best = this;
+        return;
+    }
+
+    float minLen = (best->item-point).lengthSquared();
+    float len = (item-point).lengthSquared();
+
+    if (len < minLen){
+        best = this;
+        minLen = len;
+    }
+
+    float x = item.x();
+    float y = item.y();
+    float z = item.z();
+
+    bool intersectionNodePreviousX = ((axis == 0) && (((x > point.x()-minLen) && (point.x()>x)) || ((x < point.x()+minLen) && (point.x()<x))));
+    bool intersectionNodePreviousY = ((axis == 1) && (((y > point.y()-minLen) && (point.y()>y)) || ((y < point.y()+minLen) && (point.y()<y))));
+    bool intersectionNodePreviousZ = ((axis == 2) && (((z > point.z()-minLen) && (point.z()>z)) || ((z < point.z()+minLen) && (point.z()<z))));
+
+    bool toRightMove = (right != NULL) && (((x < point.x()+minLen) && (point.x()<x)) || ((y < point.y()+minLen) && (point.y()<y)) || ((z < point.z()+minLen) && (point.z()<z)));
+    bool toLeftMove = (left != NULL) && (((x > point.x()-minLen) && (point.x()>x)) || ((y > point.y()-minLen) && (point.y()>y)) || ((z > point.z()-minLen) && (point.z()>z)));
+
+    if (intersectionNodePreviousX || intersectionNodePreviousY || intersectionNodePreviousZ){
+        if (toRightMove)
+           right->nearestNeighborSearch(point, best);
+        if (toLeftMove)
+           left->nearestNeighborSearch(point, best);
+    }
+}
+
+
+
+Leaf::Leaf(QVector3D item)
+{
+    this->item = item;
+    isLeaf = true;
+}
+
+
 
 Divider::Divider(Node *right, Node *left, QVector3D item, int axis)
     :right(right), left(left), axis(axis)
@@ -191,8 +229,9 @@ Divider::Divider(Node *right, Node *left, QVector3D item, int axis)
     isLeaf = false;
 }
 
-Leaf::Leaf(QVector3D item)
+
+
+void Node::nearestNeighborSearch(QVector3D &point, Node *&best)
 {
-    this->item = item;
-    isLeaf = true;
+
 }

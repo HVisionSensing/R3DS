@@ -5,6 +5,11 @@
 #include <QVector3D>
 #include <QList>
 #include <QtMath>
+#include <QTimer>
+#include <QTime>
+#include <QDebug>
+#include <functional>
+#include <time.h>
 
 struct BorderAxis
 {
@@ -18,19 +23,13 @@ public:
 
 
 
-class Leaf;
-class Divider;
-
-
-
 class Node
 {
 public:
-    virtual ~Node() = 0;
     QVector3D item;
     bool isLeaf;
-    virtual Leaf *toLeaf() = 0;
-    virtual Divider *toDivider() = 0;
+
+    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) = 0;
 };
 
 
@@ -40,12 +39,7 @@ class Leaf : public Node
 public:
     Leaf(QVector3D item);
 
-    virtual Leaf *toLeaf(){
-        return this;
-    }
-    virtual Divider *toDivider(){
-        return NULL;
-    }
+    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) override;
 };
 
 
@@ -59,27 +53,23 @@ public:
 
     int axis = -1;
 
-    virtual Leaf *toLeaf(){
-        return NULL;
-    }
-    virtual Divider *toDivider(){
-        return this;
-    }
-
     Divider(Node *right, Node *left, QVector3D item, int axis);
+
+    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) override;
 };
-
-
 
 class KdTree
 {
 public:
-    static Node *kdTreeBuild(QVector<QVector3D> &points, int depth, int dimension);
-    static QList<BorderAxis> getBorder(QVector<QVector3D> points, int dimension);
-    static void nearestNeighborSearch(QVector3D &point, Node *tree, int dimension, Node *&best);
+    static QVector3D nearestNeighborSearchBasic(QVector3D point, QVector<QVector3D> &points);
+    static QVector3D nearestNeighborSearchNotBasic(QVector3D point, QVector<QVector3D> &points);
+    static float testingKnn(QVector<QVector3D> &meshFirst, QVector<QVector3D> &meshSecond, std::function<QVector3D (QVector3D, QVector<QVector3D>&)> func);
+    static Node *kdTreeBuild(QVector<QVector3D> &points);
+    static QList<BorderAxis> getBorder(QVector<QVector3D> points);
     static bool comparsionVectorsX(QVector3D &pointsFirst, QVector3D &pointsSecond);
     static bool comparsionVectorsY(QVector3D &pointsFirst, QVector3D &pointsSecond);
     static bool comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond);
+
 };
 
 #endif // KDTREENEW_H

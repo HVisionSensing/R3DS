@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "objloader.h"
 #include "objloadertests.h"
+#include "kdtree.h"
 
 void runTests()
 {
@@ -65,4 +66,25 @@ void MainWindow::on_actionSave_triggered()
     objLoader->saveFile(fileName, objLoader->verticesList, objLoader->normalsList, objLoader->texturesList,
                         objLoader->indexVertices, objLoader->indexNormals, objLoader->indexTextures);
 
+}
+
+void MainWindow::on_actiontest_triggered()
+{
+    if (objLoader == NULL){
+        QMessageBox::warning(this, "exception", "not mesh");
+        return;
+    }
+
+    /*float start = clock();
+    Node *best = NULL;
+    Node *tree = KdTree::kdTreeBuild(objLoader->verticesList);
+    float start = clock();
+    for (int pointIndex = 0; pointIndex < objLoader->verticesList.size(); pointIndex++){
+        tree->nearestNeighborSearch(objLoader->verticesList.operator [](pointIndex), best);
+    }
+    float end = clock();
+    float f = (end-start)/CLK_TCK;
+    //float test1 = KdTree::testingKnn(objLoader->verticesList, objLoader->verticesList, KdTree::nearestNeighborSearchBasic);
+    //float test2 = KdTree::testingKnn(objLoader->verticesList, objLoader->verticesList, KdTree::nearestNeighborSearchNotBasic);
+    int a = 5+3;*/
 }
