@@ -54,7 +54,7 @@
   </action>
   <action name="actiontest">
    <property name="text">
-    <string>test</string>
+    <string>Nearest test</string>
    </property>
   </action>
  </widget>

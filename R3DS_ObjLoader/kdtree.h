@@ -29,7 +29,7 @@ public:
     QVector3D item;
     bool isLeaf;
 
-    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) = 0;
+    virtual void nearestNeighborSearch(QVector3D &point, QVector3D *&best) = 0;
 };
 
 
@@ -39,7 +39,7 @@ class Leaf : public Node
 public:
     Leaf(QVector3D item);
 
-    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) override;
+    virtual void nearestNeighborSearch(QVector3D &point, QVector3D *&best) override;
 };
 
 
@@ -55,15 +55,12 @@ public:
 
     Divider(Node *right, Node *left, QVector3D item, int axis);
 
-    virtual void nearestNeighborSearch(QVector3D &point, Node *&best) override;
+    virtual void nearestNeighborSearch(QVector3D &point, QVector3D *&best) override;
 };
 
 class KdTree
 {
 public:
-    static QVector3D nearestNeighborSearchBasic(QVector3D point, QVector<QVector3D> &points);
-    static QVector3D nearestNeighborSearchNotBasic(QVector3D point, QVector<QVector3D> &points);
-    static float testingKnn(QVector<QVector3D> &meshFirst, QVector<QVector3D> &meshSecond, std::function<QVector3D (QVector3D, QVector<QVector3D>&)> func);
     static Node *kdTreeBuild(QVector<QVector3D> &points);
     static QList<BorderAxis> getBorder(QVector<QVector3D> points);
     static bool comparsionVectorsX(QVector3D &pointsFirst, QVector3D &pointsSecond);

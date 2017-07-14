@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QFileDialog>
 #include "objloader.h"
+#include "kdtree.h"
+#include "pointfinder.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,6 +21,9 @@ public:
 
 public:
     ObjLoader *objLoader = NULL;
+
+public:
+    static float nearestSearchTest(QVector<QVector3D> mesh1, PointFinder &finder);
 
 private slots:
     void on_actionOpen_triggered();

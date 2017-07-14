@@ -1,39 +1,5 @@
 #include "kdtree.h"
 
-QVector3D KdTree::nearestNeighborSearchBasic(QVector3D point, QVector<QVector3D> &points)
-{
-    QVector3D best = points.operator [](0);
-
-    for (int indexPoints = 0; indexPoints < points.size(); indexPoints++)
-        if ((points.at(indexPoints)-point).lengthSquared() < (best-point).lengthSquared())
-            best = points.operator [](indexPoints);
-    return best;
-}
-
-
-
-QVector3D KdTree::nearestNeighborSearchNotBasic(QVector3D point, QVector<QVector3D> &points)
-{
-    Node *tree = KdTree::kdTreeBuild(points);
-    Node *best = NULL;
-    tree->nearestNeighborSearch(point, best);
-    return best->item;
-}
-
-
-
-float KdTree::testingKnn(QVector<QVector3D> &meshFirst, QVector<QVector3D> &meshSecond, std::function<QVector3D(QVector3D, QVector<QVector3D>&)> func)
-{
-    float start = clock();
-    for (int pointIndex = 0; pointIndex < meshFirst.size(); pointIndex++){
-        QVector3D nearPoint = func(meshFirst.operator [](pointIndex), meshSecond);
-    }
-    float end = clock();
-    return (end-start)/CLK_TCK;
-}
-
-
-
 Node *KdTree::kdTreeBuild(QVector<QVector3D> &points)
 {
     QList<BorderAxis> borderAxis = KdTree::getBorder(points);
@@ -135,26 +101,26 @@ bool KdTree::comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond)
 
 
 
-void Leaf::nearestNeighborSearch(QVector3D &point, Node *&best)
+void Leaf::nearestNeighborSearch(QVector3D &point, QVector3D *&best)
 {
     if (best == NULL){
-        best = this;
+        best = &this->item;
         return;
     }
 
-    float minLen = (best->item-point).lengthSquared();
+    float minLen = (*best-point).lengthSquared();
     float len = (item-point).lengthSquared();
 
     if (len >= minLen)
         return;
 
-    best = this;
+    best = &this->item;
     minLen = len;
 }
 
 
 
-void Divider::nearestNeighborSearch(QVector3D &point, Node *&best)
+void Divider::nearestNeighborSearch(QVector3D &point, QVector3D *&best)
 {
     int axis = this->axis;
     bool toLeft = false;
@@ -181,15 +147,15 @@ void Divider::nearestNeighborSearch(QVector3D &point, Node *&best)
     }
 
     if (best == NULL){
-        best = this;
+        best = &this->item;
         return;
     }
 
-    float minLen = (best->item-point).lengthSquared();
+    float minLen = (*best-point).lengthSquared();
     float len = (item-point).lengthSquared();
 
     if (len < minLen){
-        best = this;
+        best = &this->item;
         minLen = len;
     }
 
@@ -227,11 +193,4 @@ Divider::Divider(Node *right, Node *left, QVector3D item, int axis)
 {
     this->item = item;
     isLeaf = false;
-}
-
-
-
-void Node::nearestNeighborSearch(QVector3D &point, Node *&best)
-{
-
 }

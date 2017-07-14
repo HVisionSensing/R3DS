@@ -1,7 +1,7 @@
 #include "objloadertests.h"
 #include "objloader.h"
 #include "kdtree.h"
-#include "kdtree.h"
+#include "pointfinder.h"
 
 ObjLoaderTests::ObjLoaderTests(QObject *parent) : QObject(parent)
 {
@@ -247,42 +247,37 @@ void ObjLoaderTests::testKdTree()
     listOfPoints.push_back(v26);
     listOfPoints.push_back(v27);
 
-
-
     Node *tree = KdTree::kdTreeBuild(listOfPoints);
 
     QVector3D point(9, 8, 0);
-    Node *best = NULL;
+    QVector3D *best = NULL;
     tree->nearestNeighborSearch(point, best);
-    QCOMPARE(best->item, v25);
-//
-    //float test1 = KdTree::testingKnn(listOfPoints, listOfPoints, KdTree::nearestNeighborSearchBasic);
-    //float test2 = KdTree::testingKnn(listOfPoints, listOfPoints, KdTree::nearestNeighborSearchNotBasic);
-//
+    QCOMPARE(*best, v25);
+
     QVector3D point2(1, 2, 0);
-    Node *best2 = NULL;
+    QVector3D *best2 = NULL;
     tree->nearestNeighborSearch(point2, best2);
-    QCOMPARE(best2->item, v21);
+    QCOMPARE(*best2, v21);
 
     QVector3D point3(7, 2, 0);
-    Node *best3 = NULL;
+    QVector3D *best3 = NULL;
     tree->nearestNeighborSearch(point3, best3);
-    QCOMPARE(best3->item, v22);
+    QCOMPARE(*best3, v22);
 
     QVector3D point4(7, 10, 0);
-    Node *best4 = NULL;
+    QVector3D *best4 = NULL;
     tree->nearestNeighborSearch(point4, best4);
-    QCOMPARE(best4->item, v26);
+    QCOMPARE(*best4, v26);
 
     QVector3D point5(15, 8, 0);
-    Node *best5 = NULL;
+    QVector3D *best5 = NULL;
     tree->nearestNeighborSearch(point5, best5);
-    QCOMPARE(best5->item, v24);
+    QCOMPARE(*best5, v24);
 
     QVector3D point6(11, 13, 0);
-    Node *best6 = NULL;
+    QVector3D *best6 = NULL;
     tree->nearestNeighborSearch(point6, best6);
-    QCOMPARE(best6->item, v27);
+    QCOMPARE(*best6, v27);
 
     QVector3D v28(8, 9, 0);
     QVector3D v29(10, 10, 0);
@@ -306,24 +301,24 @@ void ObjLoaderTests::testKdTree()
     Node *tree2 = KdTree::kdTreeBuild(listOfPoints);
 
     QVector3D point7(10, 13, 0);
-    Node *best7 = NULL;
+    QVector3D *best7 = NULL;
     tree2->nearestNeighborSearch(point7, best7);
-    QCOMPARE(best7->item, v27);
+    QCOMPARE(*best7, v27);
 
     QVector3D point8(12, 11, 0);
-    Node *best8 = NULL;
+    QVector3D *best8 = NULL;
     tree2->nearestNeighborSearch(point8, best8);
-    QCOMPARE(best8->item, v29);
+    QCOMPARE(*best8, v29);
 
     QVector3D point9(6.1, 9.8, 0);
-    Node *best9 = NULL;
+    QVector3D *best9 = NULL;
     tree2->nearestNeighborSearch(point9, best9);
-    QCOMPARE(best9->item, v26);
+    QCOMPARE(*best9, v26);
 
     QVector3D point10(15, 8, 0);
-    Node *best10 = NULL;
+    QVector3D *best10 = NULL;
     tree2->nearestNeighborSearch(point10, best10);
-    QCOMPARE(best10->item, v24);
+    QCOMPARE(*best10, v24);
 }
 
 

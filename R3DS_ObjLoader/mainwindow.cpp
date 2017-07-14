@@ -3,6 +3,7 @@
 #include "objloader.h"
 #include "objloadertests.h"
 #include "kdtree.h"
+#include "pointfinder.h"
 
 void runTests()
 {
@@ -25,6 +26,19 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+
+float MainWindow::nearestSearchTest(QVector<QVector3D> mesh1, PointFinder &finder)
+{
+    float startClock = clock();
+    QVector3D best;
+    for (int indexPoint = 0; indexPoint < mesh1.size(); indexPoint++){
+        best = finder.findNearestPoint(mesh1.at(indexPoint));
+    }
+    float endClock = clock();
+    return (endClock-startClock)/CLK_TCK;
 }
 
 
@@ -68,6 +82,8 @@ void MainWindow::on_actionSave_triggered()
 
 }
 
+
+
 void MainWindow::on_actiontest_triggered()
 {
     if (objLoader == NULL){
@@ -75,16 +91,13 @@ void MainWindow::on_actiontest_triggered()
         return;
     }
 
-    /*float start = clock();
-    Node *best = NULL;
+    PointFinderNaive finderNaive(objLoader->verticesList);
+    float timeNaive = MainWindow::nearestSearchTest(objLoader->verticesList, finderNaive);
+
     Node *tree = KdTree::kdTreeBuild(objLoader->verticesList);
-    float start = clock();
-    for (int pointIndex = 0; pointIndex < objLoader->verticesList.size(); pointIndex++){
-        tree->nearestNeighborSearch(objLoader->verticesList.operator [](pointIndex), best);
-    }
-    float end = clock();
-    float f = (end-start)/CLK_TCK;
-    //float test1 = KdTree::testingKnn(objLoader->verticesList, objLoader->verticesList, KdTree::nearestNeighborSearchBasic);
-    //float test2 = KdTree::testingKnn(objLoader->verticesList, objLoader->verticesList, KdTree::nearestNeighborSearchNotBasic);
-    int a = 5+3;*/
+    PointFinderKDTree finderKDTree(tree);
+    float timeKDTree = MainWindow::nearestSearchTest(objLoader->verticesList, finderKDTree);
+
+    QString message = "Without KDTree: " + QString::number(timeNaive) + "\nWith KDTree: " + QString::number(timeKDTree);
+    QMessageBox::information(this, "Nearest test", message);
 }
