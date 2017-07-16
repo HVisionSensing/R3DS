@@ -28,15 +28,11 @@ SOURCES += \
         mainwindow.cpp \
     objloader.cpp \
     objloadertests.cpp \
-    kdtree.cpp \
-    pointfinder.cpp
 
 HEADERS += \
         mainwindow.h \
     objloader.h \
     objloadertests.h \
-    kdtree.h \
-    pointfinder.h
 
 FORMS += \
         mainwindow.ui

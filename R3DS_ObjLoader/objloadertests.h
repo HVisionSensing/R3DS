@@ -24,7 +24,6 @@ private slots:
     void testTriangulation();
     void testGetCorrectionLine();
     void testGetSizePolygon();
-    void testKdTree();
 };
 
 
