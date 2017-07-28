@@ -1,0 +1,155 @@
+#ifndef GRADIENTDESCENT_H
+#define GRADIENTDESCENT_H
+
+#include <QVector>
+#include <QVector2D>
+#include <QVector3D>
+#include <QDebug>
+#include "math.h"
+#include "updatefunctor.h"
+#include "autodiff.h"
+#include <Eigen/Dense>
+#include <Eigen/Core>
+
+struct ProblemVector
+{
+    float alpha;
+    float shiftX;
+    float shiftY;
+    float shiftZ;
+    ProblemVector(float alpha, float shiftX, float shiftY, float shiftZ);
+
+    float getLen(){return (alpha*alpha + shiftX*shiftX + shiftY*shiftY + shiftZ*shiftZ);}
+
+    ProblemVector operator *(float value){
+        float newAlpha = alpha*value;
+        float newShiftX = shiftX*value;
+        float newShiftY = shiftY*value;
+        float newShiftZ = shiftZ*value;
+        ProblemVector newInfo(newAlpha, newShiftX, newShiftY, newShiftZ);
+        return newInfo;
+    }
+
+    ProblemVector operator -(ProblemVector value){
+        float newAlpha = alpha-value.alpha;
+        float newShiftX = shiftX-value.shiftX;
+        float newShiftY = shiftY-value.shiftY;
+        float newShiftZ = shiftZ-value.shiftZ;
+        ProblemVector newInfo(newAlpha, newShiftX, newShiftY, newShiftZ);
+        return newInfo;
+    }
+
+    ProblemVector operator +(ProblemVector value){
+        float newAlpha = alpha+value.alpha;
+        float newShiftX = shiftX+value.shiftX;
+        float newShiftY = shiftY+value.shiftY;
+        float newShiftZ = shiftZ+value.shiftZ;
+        ProblemVector newInfo(newAlpha, newShiftX, newShiftY, newShiftZ);
+        return newInfo;
+    }
+};
+
+
+
+struct Settings
+{
+public:
+    const int steps;
+    const float lambda;
+    const float epsilon;
+    Settings(int steps, float lambda, float epsilon);
+};
+
+
+
+class GradientDescent
+{
+public:
+    static ProblemVector getGradientAnalytical(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const ProblemVector &x);
+    static ProblemVector getGradientNumerical(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const ProblemVector &x);
+    static ProblemVector gradientDescent(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, UpdateFunctor *update = NULL);
+    static ProblemVector comparisonGradients(ProblemVector &gradientFirst, ProblemVector &gradientSecond);
+    template< typename Scalar >
+    static Scalar getFunctionRodrigues(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const Scalar &alpha, const Scalar &shiftX, const Scalar &shiftY, const Scalar &shiftZ);
+    template< typename Scalar >
+    static Scalar getFunctionNaive(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const Scalar &alpha, const Scalar &shiftX, const Scalar &shiftY, const Scalar &shiftZ);
+};
+
+
+
+
+
+
+
+
+
+
+
+template<typename Scalar>
+Scalar GradientDescent::getFunctionRodrigues(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const Scalar &alpha, const Scalar &shiftX, const Scalar &shiftY, const Scalar &shiftZ)
+{
+    QVector3D unitVectX(1,0,0);
+    QVector3D unitVectY(0,1,0);
+    QVector3D unitVectZ(0,0,1);
+    Scalar function = 0;
+    Scalar rotatedY = 0;
+    Scalar rotatedX = 0;
+    Scalar rotatedZ = 0;
+    Scalar shiftXlocal = 0;
+    Scalar shiftYlocal = 0;
+    Scalar shiftZlocal = 0;
+    Scalar differenceX = 0;
+    Scalar differenceY = 0;
+    Scalar differenceZ = 0;
+    for (int indexPoint = 0; indexPoint < meshFrom.size(); indexPoint++){
+        QVector3D a(unitVectX.y()*meshFrom[indexPoint].z()-unitVectX.z()*meshFrom[indexPoint].y(), unitVectX.x()*meshFrom[indexPoint].z()-unitVectX.z()*meshFrom[indexPoint].x()*(-1),
+                    unitVectX.x()*meshFrom[indexPoint].y()-unitVectX.y()*meshFrom[indexPoint].x());
+        rotatedX = (unitVectX * meshFrom[indexPoint]) * ((cos(alpha)-1)*-1)*unitVectX + a*sin(alpha) + meshFrom[indexPoint]*cos(alpha);
+
+
+        /*rotatedX = cos(alpha)*meshFrom[indexPoint].x() - sin(alpha)*meshFrom[indexPoint].y();
+        rotatedY = sin(alpha)*meshFrom[indexPoint].x() + cos(alpha)*meshFrom[indexPoint].y();
+        shiftXlocal = rotatedX + shiftX;
+        shiftYlocal = rotatedY + shiftY;
+        differenceX = shiftXlocal - meshTo[indexPoint].x();
+        differenceY = shiftYlocal - meshTo[indexPoint].y();
+        function = function + differenceX*differenceX + differenceY*differenceY;*/
+
+    }
+
+    return function;
+}
+
+
+
+
+template<typename Scalar>
+Scalar GradientDescent::getFunctionNaive(const QVector<QVector3D> &meshFrom, const QVector<QVector3D> &meshTo, const Scalar &alpha, const Scalar &shiftX, const Scalar &shiftY, const Scalar &shiftZ)
+{
+    Scalar function = 0;
+    for (int indexPoint = 0; indexPoint < meshFrom.size(); indexPoint++){
+        Scalar rotatedXOne = meshFrom[indexPoint].x();
+        Scalar rotatedYOne = cos(alpha)*meshFrom[indexPoint].y() + sin(alpha)*meshFrom[indexPoint].z();
+        Scalar rotatedZOne = sin(alpha)*meshFrom[indexPoint].y()*(-1) + cos(alpha)*meshFrom[indexPoint].z();
+
+        Scalar rotatedXTwo = cos(alpha)*rotatedXOne + sin(alpha)*rotatedZOne;
+        Scalar rotatedYTwo = rotatedYOne;
+        Scalar rotatedZTwo = sin(alpha)*rotatedXOne*(-1) + cos(alpha)*rotatedZOne;
+
+        Scalar rotatedXTree = cos(alpha)*rotatedXTwo - sin(alpha)*rotatedYTwo;
+        Scalar rotatedYTree = sin(alpha)*rotatedXTwo + cos(alpha)*rotatedYTwo;
+        Scalar rotatedZTree = rotatedZTwo;
+
+        Scalar shiftXlocal = rotatedXTree + shiftX;
+        Scalar shiftYlocal = rotatedYTree + shiftY;
+        Scalar shiftZlocal = rotatedZTree + shiftZ;
+
+        Scalar differenceX = shiftXlocal - meshTo[indexPoint].x();
+        Scalar differenceY = shiftYlocal - meshTo[indexPoint].y();
+        Scalar differenceZ = shiftZlocal - meshTo[indexPoint].z();
+        function = differenceX*differenceX + differenceY*differenceY + differenceZ*differenceZ;
+    }
+    return function;
+}
+
+#endif // GRADIENTDESCENT_H
