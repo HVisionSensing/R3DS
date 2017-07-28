@@ -8,6 +8,7 @@
 #include <QVector3D>
 #include "gradientdescent.h"
 #include "autodiff.h"
+#include "transformation.h"
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
@@ -26,7 +27,6 @@ public:
     static AutoDiff funcTestAutoDiffFour(float x, float a);
 private slots:
     void testGradientDescent();
-    void testEigen();
     void testRodrigues();
 };
 #endif // TESTKDTREE_H

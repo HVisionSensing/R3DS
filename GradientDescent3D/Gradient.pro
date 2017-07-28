@@ -31,12 +31,16 @@ SOURCES += main.cpp\
     testgradientdescent.cpp \
     gradientdescent.cpp \
     updatefunctor.cpp \
-    autodiff.cpp
+    autodiff.cpp \
+    problemvector.cpp
 
 HEADERS  += mainwindow.h \
     testgradientdescent.h \
     gradientdescent.h \
     updatefunctor.h \
-    autodiff.h
+    autodiff.h \
+    problemvector.h \
+    settings.h \
+    transformation.h
 
 FORMS    += mainwindow.ui

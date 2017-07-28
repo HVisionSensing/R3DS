@@ -2,7 +2,6 @@
 
 AutoDiff::AutoDiff()
 {
-
 }
 
 AutoDiff::AutoDiff(float value, float derivative)
@@ -15,38 +14,18 @@ AutoDiff::AutoDiff(float value)
 {
 }
 
-float AutoDiff::getValue() const
+
+
+float AutoDiff::Value() const
 {
     return value;
 }
 
 
 
-float AutoDiff::getDerivative() const
+float AutoDiff::Derivative() const
 {
     return derivative;
-}
-
-
-
-AutoDiff AutoDiff::coss(const AutoDiff &func)
-{
-    return AutoDiff(cos(func.value), -sin(func.value)*func.derivative);
-}
-
-
-
-AutoDiff AutoDiff::sinn(const AutoDiff &func)
-{
-    return AutoDiff(sin(func.value), cos(func.value)*func.derivative);
-}
-
-
-
-AutoDiff AutoDiff::sqrtt(const AutoDiff &func)
-{
-    Q_ASSERT(sqrt(func.value) > -0.0001);
-    return AutoDiff(sqrt(func.value), func.derivative/2/sqrt(func.value));
 }
 
 
@@ -65,21 +44,58 @@ AutoDiff AutoDiff::IndependendVariable(AutoDiff x)
 
 
 
-AutoDiff cos(const AutoDiff &func)
+AutoDiff cos(const AutoDiff &x)
 {
-    return AutoDiff::coss(func);
+    return AutoDiff(cos(x.Value()), -sin(x.Value())*x.Derivative());
 }
 
 
 
-AutoDiff sin(const AutoDiff &func)
+AutoDiff sin(const AutoDiff &x)
 {
-    return AutoDiff::sinn(func);
+    return AutoDiff(sin(x.Value()), cos(x.Value())*x.Derivative());
 }
 
 
 
-AutoDiff sqrt(const AutoDiff &func)
+AutoDiff sqrt(const AutoDiff &x)
 {
-    return AutoDiff::sqrtt(func);
+    Q_ASSERT(sqrt(x.Value()) > -0.00001);
+    return AutoDiff(sqrt(x.Value()), x.Derivative()/2/sqrt(x.Value()));
+}
+
+
+
+AutoDiff operator/(const AutoDiff &x1, const AutoDiff &x2)
+{
+    Q_ASSERT(fabs(x2.Value()) > 0.00001);
+    return AutoDiff(x1.Value() / x2.Value(), (x1.Derivative() * x2.Value() - x1.Value() * x2.Derivative()) / x2.Value() / x2.Value());
+}
+
+
+
+AutoDiff operator-(const AutoDiff &x1, const AutoDiff &x2)
+{
+    return AutoDiff(x1.Value() - x2.Value(), x1.Derivative() - x2.Derivative());
+}
+
+
+
+AutoDiff operator+(const AutoDiff &x1, const AutoDiff &x2)
+{
+    return AutoDiff(x1.Value() + x2.Value(), x1.Derivative() + x2.Derivative());
+}
+
+
+
+AutoDiff operator*(const AutoDiff &x1, const AutoDiff &x2)
+{
+    return AutoDiff(x1.Value() * x2.Value(), x1.Derivative() * x2.Value() + x1.Value() * x2.Derivative());
+}
+
+
+
+Vector3<AutoDiff> operator*(const AutoDiff &x1, const Vector3<AutoDiff> &x2)
+{
+    return Vector3<AutoDiff>(x1*x2[0], x1*x2[1], x1*x2[2]);
 }

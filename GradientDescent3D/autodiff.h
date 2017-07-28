@@ -21,51 +21,20 @@ public:
     AutoDiff();
     AutoDiff(float value, float derivative);
     AutoDiff(float value);
-    float getValue() const;
-    float getDerivative() const;
+    float Value() const;
+    float Derivative() const;
 
-    AutoDiff operator+(const AutoDiff &func) const{
-        return AutoDiff(value + func.value, derivative + func.derivative);
-    }
-
-    AutoDiff operator-(const AutoDiff &func) const{
-        return AutoDiff(value - func.value, derivative - func.derivative);
-    }
-
-    AutoDiff operator*(const AutoDiff &func) const{
-        return AutoDiff(value * func.value, derivative * func.value + value * func.derivative);
-    }
-
-    bool operator <(const float func) const{
-        return value < func;
-    }
-
-    Vector3<AutoDiff> operator*(Vector3<AutoDiff> &func){
-        AutoDiff newP(value, derivative);
-        AutoDiff newX = newP*func[0];
-        AutoDiff newY = newP*func[1];
-        AutoDiff newZ = newP*func[2];
-        Vector3<AutoDiff> newVector(newX, newY, newZ);
-        return newVector;
-    }
-
-
-    static AutoDiff coss(const AutoDiff &func);
-    static AutoDiff sinn(const AutoDiff &func);
-    static AutoDiff sqrtt(const AutoDiff &func);
+public:
     static AutoDiff IndependendVariable(float x);
     static AutoDiff IndependendVariable(AutoDiff x);
 };
 
-inline AutoDiff operator/(const AutoDiff &a, const AutoDiff &func)
-{
-    Q_ASSERT(fabs(func.getValue()) > 0.0001);
-
-    return AutoDiff(a.getValue() / func.getValue(), (a.getDerivative() * func.getValue() - a.getValue() * func.getDerivative()) / func.getValue() / func.getValue());
-}
-
-
-AutoDiff cos(const AutoDiff &func);
-AutoDiff sin(const AutoDiff &func);
-AutoDiff sqrt(const AutoDiff &func);
+Vector3<AutoDiff> operator*(const AutoDiff &x1, const Vector3<AutoDiff> &x2);
+AutoDiff operator+(const AutoDiff &x1, const AutoDiff &x2);
+AutoDiff operator-(const AutoDiff &x1, const AutoDiff &x2);
+AutoDiff operator*(const AutoDiff &x1, const AutoDiff &x2);
+AutoDiff operator/(const AutoDiff &x1, const AutoDiff &x2);
+AutoDiff cos(const AutoDiff &x);
+AutoDiff sin(const AutoDiff &x);
+AutoDiff sqrt(const AutoDiff &x);
 #endif // AUTODIFF_H

@@ -13,6 +13,7 @@
 #include "wglobjectrenderer.h"
 #include "wglgrid.h"
 #include "wgldots.h"
+#include "transformation.h"
 #include <Eigen/Core>
 #include <autodiff.h>
 
@@ -23,21 +24,7 @@ using Vector3 = Eigen::Matrix<S, 3, 1> ;
 class UpdateFunctor
 {
 public:
-    virtual void update(const float angle, const float shiftX, const float shiftY, const float shiftZ, const Vector3<float> axisProblem) = 0;
-public:
-    static QVector3D shiftPoint(const float &shiftX, const float &shiftY, const float shiftZ, const QVector3D &point);
-    static QVector3D rotatePoint(const float &angle, const Vector3<float> axisProblem, const QVector3D &point);
-    static QVector3D transformatePoint(const float &angle, const Vector3<float> axisProblem, const float &shiftX, const float &shiftY, const float shiftZ, const QVector3D &point);
-};
-
-
-
-class UpdateFunctorQDebug : public UpdateFunctor
-{
-public:
-    QVector<QVector3D> mesh;
-    UpdateFunctorQDebug(QVector<QVector3D> mesh);
-    virtual void update(const float angle, const float shiftX, const float shiftY, const float shiftZ, const Vector3<float> axisProblem) override;
+    virtual void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) = 0;
 };
 
 
@@ -52,8 +39,11 @@ public:
     Wrap::WGLObjectRenderer *glRenderer = nullptr;
     Wrap::WViewport *viewport = nullptr;
 
-    UpdateFunctorViewPort(GeometryStack2::GeomStackTriangulated *geom, Wrap::WGLDataGeomStackTriangulated *glData, Wrap::WGLObjectRenderer *glRenderer, Wrap::WViewport *viewport, Wrap::WGLMaterialSurface *glMaterialSurface, Wrap::WGLMaterialWireframe *glMaterialWireframe);
-    virtual void update(const float angle, const float shiftX, const float shiftY, const float shiftZ, const Vector3<float> axisProblem) override;
+public:
+    UpdateFunctorViewPort(GeometryStack2::GeomStackTriangulated *geom, Wrap::WGLDataGeomStackTriangulated *glData, Wrap::WGLObjectRenderer *glRenderer,
+                          Wrap::WViewport *viewport, Wrap::WGLMaterialSurface *glMaterialSurface, Wrap::WGLMaterialWireframe *glMaterialWireframe);
+
+    virtual void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) override;
 };
 
 #endif // UPDATEFUNCTOR_H
