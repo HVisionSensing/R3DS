@@ -9,6 +9,7 @@
 #include "gradientdescent.h"
 #include "autodiff.h"
 #include "transformation.h"
+#include "errorfunctions.h"
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
@@ -26,7 +27,11 @@ public:
     static AutoDiff funcTestAutoDiffThree(float x, float a);
     static AutoDiff funcTestAutoDiffFour(float x, float a);
 private slots:
-    void testGradientDescent();
+    void testErrorFunctionQua();
+    void testErrorFunctionRod();
+    void testGradientAnalytical();
+    void testAutoDiff();
     void testRodrigues();
+    void testQuaternion();
 };
 #endif // TESTKDTREE_H

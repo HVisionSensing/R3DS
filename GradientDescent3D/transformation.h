@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <QVector3D>
 
 using namespace Eigen;
@@ -17,9 +18,20 @@ public:
     static Vector3<Scalar> shiftPoint(const Scalar &shiftX, const Scalar &shiftY, const Scalar shiftZ, const Vector3<Scalar> &point);
     template< typename Scalar >
     static Vector3<Scalar> rotateRodrigues(const Vector3<Scalar> &point, const Vector3<Scalar> &axis, const Scalar &angle);
+    template< typename Scalar >
+    static Vector3<Scalar> rotateQuaternion(const Vector3<Scalar> &point, const Vector3<Scalar> &axis, const Scalar &angle);
 };
 
 
+
+
+template<typename Scalar>
+Vector3<Scalar> Transformation::rotateQuaternion(const Vector3<Scalar> &point, const Vector3<Scalar> &axis, const Scalar &angle)
+{
+    Quaternion<Scalar> quaternion(AngleAxis<Scalar>(angle, axis));
+    Vector3<Scalar> rotated = quaternion * point;
+    return rotated;
+}
 
 
 

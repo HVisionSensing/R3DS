@@ -73,8 +73,8 @@ void MainWindow::deinitializeViewport()
 
 void MainWindow::loadGeometryFromFile()
 {
-    //if (hasGeometry())
-        //clearGeometry();
+    if (hasGeometry())
+        clearGeometry();
     const QString fileName = QFileDialog::getOpenFileName(this,"Load geometry",QString(),"OBJ-file (*.obj)");
     if (fileName.isNull())
         return;
@@ -114,23 +114,24 @@ void MainWindow::fitToView()
 
 void MainWindow::clearGeometry()
 {
-    Q_ASSERT(hasGeometry());
-    viewport->removeObject(glRendererFirst);
-    delete glRendererFirst;
-    glRendererFirst = nullptr;
-    delete glDataFirst;
-    glDataFirst = nullptr;
-    delete geomFirst;
-    geomFirst = nullptr;
-
-    viewport->removeObject(glRendererSecond);
-    delete glRendererSecond;
-    glRendererSecond = nullptr;
-    delete glDataSecond;
-    glDataSecond = nullptr;
-    delete geomSecond;
-    geomSecond = nullptr;
-
+    if (geomFirst != nullptr){
+        viewport->removeObject(glRendererFirst);
+        delete glRendererFirst;
+        glRendererFirst = nullptr;
+        delete glDataFirst;
+        glDataFirst = nullptr;
+        delete geomFirst;
+        geomFirst = nullptr;
+    }
+    if (geomSecond != nullptr){
+        viewport->removeObject(glRendererSecond);
+        delete glRendererSecond;
+        glRendererSecond = nullptr;
+        delete glDataSecond;
+        glDataSecond = nullptr;
+        delete geomSecond;
+        geomSecond = nullptr;
+    }
     viewport->update();
 }
 
@@ -138,7 +139,7 @@ void MainWindow::clearGeometry()
 
 bool MainWindow::hasGeometry() const
 {
-    return (geomFirst != nullptr) || (geomSecond != nullptr);
+    return (geomFirst != nullptr) && (geomSecond != nullptr);
 }
 
 
@@ -165,7 +166,9 @@ void MainWindow::clearDots()
 
 void MainWindow::gradientDescent()
 {
+    if(!hasGeometry())
+        return;
     UpdateFunctorViewPort *update = new UpdateFunctorViewPort(geomFirst, glDataFirst, glRendererFirst, viewport, glMaterialSurface, glMaterialWireframe);
-    ProblemVector x = GradientDescent::gradientDescent(geomFirst->v, geomSecond->v, update);
+    ProblemVector x = GradientDescent::gradientDescent(geomFirst->v, geomSecond->v, ErrorFunctionRod(), update);
 }
 

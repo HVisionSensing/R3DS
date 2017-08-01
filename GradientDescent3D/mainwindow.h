@@ -6,6 +6,7 @@
 #include <testGradientDescent.h>
 #include "updatefunctor.h"
 #include "wcontextnavigation.h"
+#include "errorfunctions.h"
 #include "wgldatageomstacktriangulated.h"
 #include "wglmaterialsurface.h"
 #include "wglmaterialwireframe.h"

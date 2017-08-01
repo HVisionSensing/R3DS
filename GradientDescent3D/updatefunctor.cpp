@@ -18,8 +18,8 @@ void UpdateFunctorViewPort::update(const float &angle, const float &shiftX, cons
         float y = geom->v[indexPoint].y();
         float z = geom->v[indexPoint].z();
         Vector3<float> point(x, y, z);
-        Vector3<float> axisUnit = axisProblem;//axisProblem.norm();
-        Vector3<float> rotatedPoint = Transformation::rotateRodrigues(point, axisUnit, angle);
+        Vector3<float> axisUnit = axisProblem;
+        Vector3<float> rotatedPoint = Transformation::rotateQuaternion(point, axisUnit, angle);
         Vector3<float> shiftPoint = Transformation::shiftPoint(shiftX, shiftY, shiftZ, rotatedPoint);
         QVector3D newPoint(shiftPoint[0], shiftPoint[1], shiftPoint[2]);
         geom->v[indexPoint] = newPoint;

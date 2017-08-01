@@ -29,7 +29,6 @@ LIBS += -lopengl32 -lglu32
 SOURCES += main.cpp\
         mainwindow.cpp \
     testgradientdescent.cpp \
-    gradientdescent.cpp \
     updatefunctor.cpp \
     autodiff.cpp \
     problemvector.cpp
@@ -41,6 +40,7 @@ HEADERS  += mainwindow.h \
     autodiff.h \
     problemvector.h \
     settings.h \
-    transformation.h
+    transformation.h \
+    errorfunctions.h
 
 FORMS    += mainwindow.ui

@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Core>
-
+#include <QVector>
 using namespace Eigen;
 
 template<typename S>

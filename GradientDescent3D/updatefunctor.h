@@ -15,6 +15,7 @@
 #include "wgldots.h"
 #include "transformation.h"
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <autodiff.h>
 
 
@@ -43,7 +44,7 @@ public:
     UpdateFunctorViewPort(GeometryStack2::GeomStackTriangulated *geom, Wrap::WGLDataGeomStackTriangulated *glData, Wrap::WGLObjectRenderer *glRenderer,
                           Wrap::WViewport *viewport, Wrap::WGLMaterialSurface *glMaterialSurface, Wrap::WGLMaterialWireframe *glMaterialWireframe);
 
-    virtual void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) override;
+    void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) override;
 };
 
 #endif // UPDATEFUNCTOR_H

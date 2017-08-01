@@ -19,8 +19,9 @@ private:
 
 public:
     AutoDiff();
-    AutoDiff(float value, float derivative);
     AutoDiff(float value);
+    AutoDiff(float value, float derivative);
+
     float Value() const;
     float Derivative() const;
 

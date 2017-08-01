@@ -60,7 +60,7 @@ AutoDiff sin(const AutoDiff &x)
 
 AutoDiff sqrt(const AutoDiff &x)
 {
-    Q_ASSERT(sqrt(x.Value()) > -0.00001);
+    Q_ASSERT(sqrt(x.Value()) > -0.000001);
     return AutoDiff(sqrt(x.Value()), x.Derivative()/2/sqrt(x.Value()));
 }
 
@@ -68,7 +68,7 @@ AutoDiff sqrt(const AutoDiff &x)
 
 AutoDiff operator/(const AutoDiff &x1, const AutoDiff &x2)
 {
-    Q_ASSERT(fabs(x2.Value()) > 0.00001);
+    Q_ASSERT(fabs(x2.Value()) > 0.000001);
     return AutoDiff(x1.Value() / x2.Value(), (x1.Derivative() * x2.Value() - x1.Value() * x2.Derivative()) / x2.Value() / x2.Value());
 }
 
