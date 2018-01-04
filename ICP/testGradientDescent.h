@@ -33,6 +33,7 @@ private slots:
     void testErrorFunctionQua();
     void testErrorFunctionRod();
     void testGradientAnalytical();
+    void testInternalEntire();
     void testKDTree();
     void testAutoDiff();
     void testRodrigues();

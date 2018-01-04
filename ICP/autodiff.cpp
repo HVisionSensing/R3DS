@@ -44,6 +44,13 @@ AutoDiff AutoDiff::IndependendVariable(AutoDiff x)
 
 
 
+void AutoDiff::setDerivable(float x)
+{
+    derivative = x;
+}
+
+
+
 AutoDiff cos(const AutoDiff &x)
 {
     return AutoDiff(cos(x.Value()), -sin(x.Value())*x.Derivative());
@@ -99,3 +106,4 @@ Vector3<AutoDiff> operator*(const AutoDiff &x1, const Vector3<AutoDiff> &x2)
 {
     return Vector3<AutoDiff>(x1*x2[0], x1*x2[1], x1*x2[2]);
 }
+

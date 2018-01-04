@@ -14,7 +14,10 @@
 #include "wglobjectrenderer.h"
 #include "wglgrid.h"
 #include "wgldots.h"
+#include "wgllines.h"
 #include "kdtree.h"
+#include "icp.h"
+#include "rigidalignment.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,7 +35,8 @@ private:
     Wrap::WCamera3D *camera = nullptr;
     Wrap::WViewport *viewport = nullptr;
     Wrap::WContextNavigation *contextNavigation = nullptr;
-    Wrap::WGLMaterialSurface *glMaterialSurface = nullptr;
+    Wrap::WGLMaterialSurface *glMaterialSurfaceOne = nullptr;
+    Wrap::WGLMaterialSurface *glMaterialSurfaceTwo = nullptr;
     Wrap::WGLMaterialWireframe *glMaterialWireframe = nullptr;
     Wrap::WGLGrid *glGrid = nullptr;
     GeometryStack2::GeomStackTriangulated *geomFirst = nullptr;
@@ -42,6 +46,7 @@ private:
     Wrap::WGLObjectRenderer *glRendererFirst = nullptr;
     Wrap::WGLObjectRenderer *glRendererSecond = nullptr;
     Wrap::WGLDots *glDots = nullptr;
+    Wrap::WGLLines *glLines = nullptr;
     Node *tree = nullptr;
 protected:
     void initializeViewport();
@@ -50,10 +55,11 @@ protected:
     bool hasGeometry() const;
     void createDots();
     void clearDots();
-    void gradientDescent();
+    void icp();
 protected slots:
     void loadGeometryFromFile();
     void fitToView();
+    void rigidAlignment();
 };
 
 #endif // MAINWINDOW_H

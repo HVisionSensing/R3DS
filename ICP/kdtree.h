@@ -24,5 +24,4 @@ public:
     static bool comparsionVectorsY(QVector3D &pointsFirst, QVector3D &pointsSecond);
     static bool comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond);
 };
-
 #endif // KDTREE_H

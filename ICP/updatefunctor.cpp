@@ -11,12 +11,12 @@ UpdateFunctorViewPort::UpdateFunctorViewPort(GeometryStack2::GeomStackTriangulat
 
 
 
-void UpdateFunctorViewPort::update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem)
+void UpdateFunctorViewPort::update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem, const QVector<QVector3D> &mesh)
 {
-    for (int indexPoint = 0; indexPoint < geom->v.size(); indexPoint++){
-        float x =geom->v[indexPoint].x();
-        float y = geom->v[indexPoint].y();
-        float z = geom->v[indexPoint].z();
+    for (int indexPoint = 0; indexPoint < mesh.size(); indexPoint++){
+        float x =mesh[indexPoint].x();
+        float y = mesh[indexPoint].y();
+        float z = mesh[indexPoint].z();
         Vector3<float> point(x, y, z);
         Vector3<float> axisUnit = axisProblem;
         Vector3<float> rotatedPoint = Transformation::rotateQuaternion(point, axisUnit, angle);
@@ -28,5 +28,4 @@ void UpdateFunctorViewPort::update(const float &angle, const float &shiftX, cons
     glData->setVertices(geom->v);
     viewport->update();
     QApplication::processEvents();
-
 }

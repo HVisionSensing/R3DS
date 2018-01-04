@@ -22,7 +22,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMenu *menuEdit = menuBar()->addMenu("Edit");
     menuEdit->addAction("Load geometry",this,&MainWindow::loadGeometryFromFile,QKeySequence::Open);
     menuEdit->addAction("Fit to view",this,&MainWindow::fitToView,QKeySequence(Qt::Key_F));
-    menuEdit->addAction("Gradient descent",this,&MainWindow::gradientDescent,QKeySequence(Qt::Key_L));
+    menuEdit->addAction("ICP",this,&MainWindow::icp,QKeySequence(Qt::Key_L));
+    menuEdit->addAction("Rigid alignment",this,&MainWindow::rigidAlignment,QKeySequence(Qt::Key_I));
     menuEdit->addAction("Clear",this,&MainWindow::clearGeometry,QKeySequence(Qt::Key_J));
 
     initializeViewport();
@@ -52,8 +53,36 @@ void MainWindow::initializeViewport()
     glGrid = new WGLGrid(20,1,WGLGrid::Axis_X,WGLGrid::Axis_Z,10);
     glGrid->setColor(QColor(60,60,60));
     viewport->addObject(glGrid);
-    glMaterialSurface = new WGLMaterialSurface();
+    glMaterialSurfaceOne = new WGLMaterialSurface();
+    glMaterialSurfaceTwo = new WGLMaterialSurface();
     glMaterialWireframe = new WGLMaterialWireframe();
+
+    QString errorMsg;
+    geomFirst = new GeometryStack2::GeomStackTriangulated("../ICP/Models/monkey.obj",errorMsg);
+    if (!errorMsg.isNull())
+        qFatal(QString("Can not load file: %1").arg("../ICP/Models/monkey.obj").toUtf8().constData());
+    glDataFirst = new WGLDataGeomStackTriangulated(*geomFirst);
+    glMaterialSurfaceOne->setColor(QColor(255,0,0));
+    glRendererFirst = new WGLObjectRenderer(glDataFirst,glMaterialSurfaceOne,WGLObjectRenderer::CullFace_Back,true);
+    glRendererFirst->addRenderPass(glMaterialWireframe,WGLObjectRenderer::CullFace_None,false);
+    viewport->addObject(glRendererFirst);
+
+    geomSecond  = new GeometryStack2::GeomStackTriangulated("../ICP/Models/monkey2.obj",errorMsg);
+    if (!errorMsg.isNull())
+        qFatal(QString("Can not load file: %1").arg("../ICP/Models/monkey2.obj").toUtf8().constData());
+    glDataSecond = new WGLDataGeomStackTriangulated(*geomSecond);
+    glMaterialSurfaceTwo->setColor(QColor(0,255,0));
+    glRendererSecond = new WGLObjectRenderer(glDataSecond,glMaterialSurfaceTwo,WGLObjectRenderer::CullFace_Back,true);
+    glRendererSecond->addRenderPass(glMaterialWireframe,WGLObjectRenderer::CullFace_None,false);
+    QVector<int> indexArray = KdTree::buildIndexArray(geomSecond->v);
+    tree = KdTree::kdTreeBuild(geomSecond->v, indexArray);
+    viewport->addObject(glRendererSecond);
+
+    /*QVector<QVector3D> vertices = { QVector3D(0,0,0), QVector3D(1,0,0)};
+    glLines = new WGLLines(vertices);
+    glLines->setColor(Qt::yellow);
+    glLines->setLineWidth(1);
+    viewport->addObject(glLines,WViewport::Overlay);*/
 }
 
 
@@ -62,7 +91,8 @@ void MainWindow::deinitializeViewport()
 {
     viewport->removeObject(glGrid);
     delete glGrid;
-    delete glMaterialSurface;
+    delete glMaterialSurfaceOne;
+    delete glMaterialSurfaceTwo;
     delete glMaterialWireframe;
     delete contextNavigation;
     delete viewport;
@@ -84,7 +114,7 @@ void MainWindow::loadGeometryFromFile()
         if (!errorMsg.isNull())
             qFatal(QString("Can not load file: %1").arg(fileName).toUtf8().constData());
         glDataFirst = new WGLDataGeomStackTriangulated(*geomFirst);
-        glRendererFirst = new WGLObjectRenderer(glDataFirst,glMaterialSurface,WGLObjectRenderer::CullFace_Back,true);
+        glRendererFirst = new WGLObjectRenderer(glDataFirst,glMaterialSurfaceOne,WGLObjectRenderer::CullFace_Back,true);
         glRendererFirst->addRenderPass(glMaterialWireframe,WGLObjectRenderer::CullFace_None,false);
         viewport->addObject(glRendererFirst);
     } else if (geomSecond == nullptr){
@@ -92,7 +122,7 @@ void MainWindow::loadGeometryFromFile()
         if (!errorMsg.isNull())
             qFatal(QString("Can not load file: %1").arg(fileName).toUtf8().constData());
         glDataSecond = new WGLDataGeomStackTriangulated(*geomSecond);
-        glRendererSecond = new WGLObjectRenderer(glDataSecond,glMaterialSurface,WGLObjectRenderer::CullFace_Back,true);
+        glRendererSecond = new WGLObjectRenderer(glDataSecond,glMaterialSurfaceTwo,WGLObjectRenderer::CullFace_Back,true);
         glRendererSecond->addRenderPass(glMaterialWireframe,WGLObjectRenderer::CullFace_None,false);
         QVector<int> indexArray = KdTree::buildIndexArray(geomSecond->v);
         tree = KdTree::kdTreeBuild(geomSecond->v, indexArray);
@@ -110,6 +140,20 @@ void MainWindow::fitToView()
         boundingBox = WBoundingBox(geomFirst->v);
     camera->fitToView(boundingBox,viewport->size());
     viewport->updateGL();
+}
+
+
+
+void MainWindow::rigidAlignment()
+{
+    if(!hasGeometry())
+        return;
+    UpdateFunctorViewPort *update = new UpdateFunctorViewPort(geomFirst, glDataFirst, glRendererFirst, viewport, glMaterialSurfaceOne, glMaterialWireframe);
+    ProblemVector x(0,0,0,0,Vector3<float>(1,0,0));
+    RigidAlignemntFirst<ErrorFunctionQua> *rigidAlignment = new RigidAlignemntFirst<ErrorFunctionQua>(geomFirst->v, geomSecond->v, ErrorFunctionQua(), update);
+    x = rigidAlignment->rigidAlignment(x, true);
+    //x = GradientDescent::gradientDescent(geomFirst->v, geomSecond->v, ErrorFunctionQua(), x, true, update);
+    //update->update(x.angle, x.shiftX, x.shiftY, x.shiftZ, x.axis, geomFirst->v);
 }
 
 
@@ -134,6 +178,7 @@ void MainWindow::clearGeometry()
         delete geomSecond;
         geomSecond = nullptr;
     }
+
     viewport->update();
 }
 
@@ -166,11 +211,29 @@ void MainWindow::clearDots()
 
 
 
-void MainWindow::gradientDescent()
+void MainWindow::icp()
 {
     if(!hasGeometry())
         return;
-    UpdateFunctorViewPort *update = new UpdateFunctorViewPort(geomFirst, glDataFirst, glRendererFirst, viewport, glMaterialSurface, glMaterialWireframe);
-    ProblemVector x = GradientDescent::gradientDescent(geomFirst->v, geomSecond->v, ErrorFunctionRod(), update, tree);
+    UpdateFunctorViewPort *update = new UpdateFunctorViewPort(geomFirst, glDataFirst, glRendererFirst, viewport, glMaterialSurfaceOne, glMaterialWireframe);
+    PointFinderKDTree *finder = new PointFinderKDTree(tree);
+    RigidAlignemntFirst<ErrorFunctionQua> *rigidAlignment = new RigidAlignemntFirst<ErrorFunctionQua>(geomFirst->v, geomSecond->v, ErrorFunctionQua(), update);
+
+    QVector<QVector3D> vertices;
+    for (int index = 0; index < geomFirst->v.size(); index++){
+        vertices.append(geomFirst->v[index]);
+        vertices.append(geomSecond->v[index]);
+    }
+
+    glLines = new WGLLines(vertices);
+    glLines->setColor(Qt::yellow);
+    glLines->setLineWidth(1);
+    viewport->addObject(glLines,WViewport::Overlay);
+
+    ProblemVector x = ICP::icp(finder, rigidAlignment, glLines, viewport);
+    //update->update(x.angle, x.shiftX, x.shiftY, x.shiftZ, x.axis, geomFirst->v);
+    //viewport->update();
+    //QApplication::processEvents();
+    //ProblemVector x = GradientDescent::gradientDescent(geomFirst->v, geomSecond->v, ErrorFunctionRod(), update, tree);
 }
 

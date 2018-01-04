@@ -25,6 +25,7 @@ public:
 
     float Value() const;
     float Derivative() const;
+    void setDerivable(float x);
 
 public:
     static AutoDiff IndependendVariable(float x);
@@ -39,4 +40,5 @@ AutoDiff operator/(const AutoDiff &x1, const AutoDiff &x2);
 AutoDiff cos(const AutoDiff &x);
 AutoDiff sin(const AutoDiff &x);
 AutoDiff sqrt(const AutoDiff &x);
+
 #endif // AUTODIFF_H

@@ -37,4 +37,5 @@ public:
 
     void nearestNeighborSearch(QVector3D &point, Node *&best) override;
 };
+
 #endif // KDTREENODES_H

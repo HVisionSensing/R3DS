@@ -50,3 +50,16 @@ ProblemVector ProblemVector::operator +(const ProblemVector &x) const
     ProblemVector newProblemVector(newAngle, newShiftX, newShiftY, newShiftZ, newAxis);
     return newProblemVector;
 }
+
+
+
+ProblemVector ProblemVector::operator /(const float &x) const
+{
+    float newAngle = angle / x;
+    float newShiftX = shiftX / x;
+    float newShiftY = shiftY / x;
+    float newShiftZ = shiftZ / x;
+    Vector3<float> newAxis = axis / x;
+    ProblemVector newProblemVector(newAngle, newShiftX, newShiftY, newShiftZ, newAxis);
+    return newProblemVector;
+}

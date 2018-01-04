@@ -26,5 +26,6 @@ public:
     ProblemVector operator *(const float &x) const;
     ProblemVector operator -(const ProblemVector &x) const;
     ProblemVector operator +(const ProblemVector &x) const;
+    ProblemVector operator /(const float &x) const;
 };
 #endif // PROBLEMVECTOR_H

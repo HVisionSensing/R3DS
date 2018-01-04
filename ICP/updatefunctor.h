@@ -26,7 +26,7 @@ using Vector3 = Eigen::Matrix<S, 3, 1> ;
 class UpdateFunctor
 {
 public:
-    virtual void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) = 0;
+    virtual void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem, const QVector<QVector3D> &mesh) = 0;
 };
 
 
@@ -45,7 +45,7 @@ public:
     UpdateFunctorViewPort(GeometryStack2::GeomStackTriangulated *geom, Wrap::WGLDataGeomStackTriangulated *glData, Wrap::WGLObjectRenderer *glRenderer,
                           Wrap::WViewport *viewport, Wrap::WGLMaterialSurface *glMaterialSurface, Wrap::WGLMaterialWireframe *glMaterialWireframe);
 
-    void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem) override;
+    void update(const float &angle, const float &shiftX, const float &shiftY, const float &shiftZ, const Vector3<float> &axisProblem, const QVector<QVector3D> &mesh) override;
 };
 
 #endif // UPDATEFUNCTOR_H

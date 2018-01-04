@@ -116,3 +116,4 @@ bool KdTree::comparsionVectorsZ(QVector3D &pointsFirst, QVector3D &pointsSecond)
 {
     return pointsFirst.z() < pointsSecond.z();
 }
+

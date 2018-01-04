@@ -21,6 +21,7 @@ include(../Andrew/Wrap3Framework/WGLObjectRendererTests01/WGLObjectRenderer/WGLO
 include(../Andrew/Wrap3Framework/WGLGridTests/WGLGrid/WGLGrid.pri)
 include(../Andrew/Wrap3Framework/Shaders/WGLShaderConst/WGLShaderConst.pri)
 include(../Andrew/Wrap3Framework/WGLDots/WGLDots/WGLDots.pri)
+include(../Andrew/WViewport3D/WGLLines/WGLLines.pri)
 
 INCLUDEPATH += ../eigen-eigen-5a0156e40feb/
 
@@ -34,7 +35,9 @@ SOURCES += main.cpp\
     problemvector.cpp \
     kdtreenodes.cpp \
     kdtree.cpp \
-    pointfinder.cpp
+    pointfinder.cpp \
+    icp.cpp \
+    gradientdescent.cpp
 
 HEADERS  += mainwindow.h \
     testgradientdescent.h \
@@ -48,6 +51,8 @@ HEADERS  += mainwindow.h \
     borderaxis.h \
     kdtreenodes.h \
     kdtree.h \
-    pointfinder.h
+    pointfinder.h \
+    icp.h \
+    rigidalignment.h
 
 FORMS    += mainwindow.ui

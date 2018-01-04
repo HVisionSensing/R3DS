@@ -116,6 +116,32 @@ void TestGradientDescent::testGradientAnalytical()
 
 
 
+void TestGradientDescent::testInternalEntire()
+{
+    QVector<QVector3D> meshFrom = {QVector3D(1,1,0)};
+    QVector<QVector3D> meshTo = {QVector3D(1,2,0)};
+    ProblemVector x(0, 0, 1, 0, Vector3<float>(1,1,1));
+    ErrorFunctionQua errorFunc;
+    VectorS<float> internal = errorFunc.internalEntire(meshFrom, meshTo, x.angle, x.shiftX, x.shiftY, x.shiftZ, x.axis);
+    QCOMPARE(internal.squaredNorm(), 0.0);
+
+    QVector<QVector3D> meshFrom2 = {QVector3D(1,1,1)};
+    QVector<QVector3D> meshTo2 = {QVector3D(2,2,2)};
+    ProblemVector x2(0, 1, 1, 1, Vector3<float>(1,1,1));
+    ErrorFunctionQua errorFunc2;
+    VectorS<float> internal2 = errorFunc2.internalEntire(meshFrom2, meshTo2, x2.angle, x2.shiftX, x2.shiftY, x2.shiftZ, x2.axis);
+    QCOMPARE(internal2.squaredNorm(), 0.0);
+
+    QVector<QVector3D> meshFrom3 = {QVector3D(1,1,0), QVector3D(1,2,0), QVector3D(2,2,0), QVector3D(2,1,0)};
+    QVector<QVector3D> meshTo3 = {QVector3D(-1,1,0), QVector3D(-2,1,0), QVector3D(-2,2,0), QVector3D(-1,2,0)};
+    ProblemVector x3(1.5708, 0, 0, 0, Vector3<float>(0,0,1));
+    ErrorFunctionQua errorFunc3;
+    VectorS<float> internal3 = errorFunc3.internalEntire(meshFrom3, meshTo3, x3.angle, x3.shiftX, x3.shiftY, x3.shiftZ, x3.axis);
+    QVERIFY(internal3.squaredNorm() < 0.00001);
+}
+
+
+
 void TestGradientDescent::testKDTree()
 {
     QVector<QVector3D> listOfPoints;
