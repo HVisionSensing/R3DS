@@ -12,43 +12,46 @@ using namespace std;
 
 class FaceDetector
 {
-private:
-    cv::Rect boundingBox(vector<cv::KeyPoint> marks);
-
-protected:
-    void resizeDetectorBox(cv::Rect &detectedBox, float kX = -0.2, float kY = -0.2, float kWidth = 0.4, float kHeight = 0.4);
-
 public:
-    void cutByLandmark(FaceShape &face);
-    void cutByLandmark(vector<FaceShape> &faces);
+    void cutByLandmark(FaceShape &face) const;
+    void cutByLandmark(vector<FaceShape> &faces) const;
 
-public:
     virtual void detect(vector<FaceShape> &faces) = 0;
     virtual void detect(FaceShape &face) = 0;
+
+protected:
+    void resizeDetectBox(cv::Rect &detectBox, float kX = -0.2, float kY = -0.1, float kWidth = 0.4, float kHeight = 0.3) const;
+    bool isPointInBox(const cv::Rect &detectBox, const cv::KeyPoint &point) const;
+    int getCountPointsInBox(const vector<cv::KeyPoint> &landmarks, const cv::Rect &detectBox) const;
+    int getIndBoxWithFace(const vector<cv::Rect> &detectBox, const std::vector<cv::KeyPoint> &landmarks) const;
+    vector<cv::Rect> convertDlibRectToOpenCVRect(const vector<dlib::rectangle> &dlibRects) const;
+
+private:
+    cv::Rect boundingBox(vector<cv::KeyPoint> marks) const;
 };
 
 
 
 class FaceDetectorOpenCV : public FaceDetector
 {
-private:
-    cv::CascadeClassifier detector;
-
 public:
     FaceDetectorOpenCV(const string &haarcascade);
     void detect(vector<FaceShape> &faces) override;
     void detect(FaceShape &face) override;
+
+private:
+    cv::CascadeClassifier detector;
 };
 
 
 class FaceDetectorDlib : public FaceDetector
 {
-private:
-    dlib::frontal_face_detector detector;
-
 public:
     FaceDetectorDlib();
     void detect(vector<FaceShape> &faces) override;
     void detect(FaceShape &face) override;
+
+private:
+    dlib::frontal_face_detector detector;
 };
 #endif // FACEDETECTOR_H

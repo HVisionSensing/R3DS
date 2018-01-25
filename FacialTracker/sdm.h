@@ -4,36 +4,48 @@
 #include "facedescriptor.h"
 #include "linearmodel.h"
 #include "dataset.h"
+#include "pca.h"
+
+#include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing/render_face_detections.h>
+#include <dlib/image_processing.h>
+#include <dlib/gui_core/gui_core_kernel_1.h>
+#include <dlib/gui_widgets.h>
+#include <dlib/image_io.h>
+#include <dlib/opencv/cv_image.h>
 
 using namespace Eigen;
 
-class SupervisedDescentMethod
-{
-
-};
-
 class SDM {
-private:
-    vector<vector<MatrixXf>> params;
+public:
+    SDM(LinearModel *model, FaceDescriptor &descriptor, vector<vector<cv::KeyPoint>> initFaces, float numOfStages);
+    void fit(const DataSet &trainSet);
+    DataSet predict(const DataSet &dataSet);
+    static float getError(const DataSet &truth, const DataSet &predict, const cv::Point &position, const cv::Scalar &color);
 
 private:
-    LinearModel *linearModel;
+    LinearModel *model;
     FaceDescriptor descriptor;
     vector<vector<cv::KeyPoint>> initFaces;
-    float numberOfStages;
+    vector<vector<MatrixXf>> params;
+    vector<PCA> pca;
+    vector<int> reducedDimensions;
+    float numOfStages;
 
-private:
-    vector<FaceShape> getStartSet(const vector<FaceShape> &dataSet);
-    vector<FaceShape> getFinishSet(const vector<FaceShape> &dataSet);
+    vector<FaceShape> getStartSet(const vector<FaceShape> &dataSet) const;
+    vector<FaceShape> getFinishSet(const vector<FaceShape> &dataSet) const;
 
-private:
     void train(MatrixXf landmarksOfStart, MatrixXf landmarksOfFinish, DataSet trainSetStart);
-
-public:
-    SDM(LinearModel *linearModel, FaceDescriptor &descriptor, vector<vector<cv::KeyPoint>> initFaces, float numberOfStages = 4);
-    void fit(DataSet &trainSet);
-    DataSet predict(const DataSet &dataSet);
-    static float getError(const DataSet &truth, const DataSet &predict, bool draw = false);
 };
 
+
+
+class SDMDlib{
+public:
+    SDMDlib(const string &predictorLandmarks);
+    DataSet predict(DataSet dataSet);
+
+private:
+    dlib::shape_predictor shapePredictor;
+};
 #endif // SDM_H

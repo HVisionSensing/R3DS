@@ -1,7 +1,5 @@
 #include "loader.h"
 
-
-
 vector<FaceShape> Loader::loadFaces(const QString &dirDataSet, const int facesCount, bool random)
 {
     vector<FaceShape> faces;
@@ -47,6 +45,11 @@ FaceShape Loader::loadFace(const QString &faceName, const QString &marksName)
     faceImage = cv::imread(faceImageStr, 1);
     marks = Loader::loadLandmarks(marksName);
 
+    //for (int i = 0; i < marks.size(); i++){
+        //float y = marks[i].pt.y;
+        //marks[i].pt.y = -y + faceImage.rows;
+    //}
+
     FaceShape face(faceImage, marks);
     return face;
 }
@@ -71,7 +74,7 @@ vector<cv::KeyPoint> Loader::loadLandmarks(const QString &marksName)
         if (!isX || !isY)
             continue;
 
-        cv::KeyPoint landmark(x, y, 32);
+        cv::KeyPoint landmark(x, y, 36);
         marks.push_back(landmark);
     }
 
@@ -120,4 +123,37 @@ void Loader::saveFace(const QString &savePath, const FaceShape &face)
 {
     cv::String saveName = savePath.toUtf8().constData();
     cv::imwrite(saveName, face.image);
+}
+
+
+
+vector<FaceShape> Loader::loadFacesWarehouse(const QString &dirDataSet, const int facesCount, const int start)
+{
+    vector<FaceShape> faces;
+    srand(1);
+
+    QString pathToFiles = dirDataSet + "LandName.txt";
+    QFile file(pathToFiles);
+    Loader::isReadFile(file);
+    int countShape = file.readLine().toInt();
+
+    for (int indStart = 1; indStart < start; indStart++)
+        file.readLine();
+
+    for (int indFace = start; indFace <= facesCount+start; indFace++){
+        QString line = file.readLine();
+        line.replace( "\\", "/");
+        QString marksName = Loader::getCorrectLine(line);
+        QString faceName = Loader::getCorrectLine(line);
+        faceName.remove(marksName.size()-6, 4);
+        faceName = faceName.simplified();
+        marksName = marksName.simplified();
+        faceName = faceName + "jpg";
+        FaceShape face = Loader::loadFace(faceName, marksName);
+        faces.push_back(face);
+        qDebug() <<"Num: " << faceName;
+        qDebug() <<"Num: " << indFace;
+    }
+
+    return faces;
 }

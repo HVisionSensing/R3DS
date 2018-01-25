@@ -13,14 +13,12 @@ class FaceDescriptor
 public:
     cv::Ptr<cv::Feature2D> descriptor;
 
-public:
     FaceDescriptor();
     FaceDescriptor(cv::Ptr<cv::Feature2D> descriptor);
     int getSize() const;
 
-public:
-    MatrixXf computeDescriptor(vector<FaceShape> &faces);
-    MatrixXf computeDescriptor(FaceShape &face);
+    MatrixXf compute(vector<FaceShape> &faces);
+    MatrixXf compute(FaceShape &face);
 };
 
 #endif // FACEDESCRIPTOR_H

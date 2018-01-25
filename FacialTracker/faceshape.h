@@ -4,6 +4,7 @@
 #include "QDebug"
 #include "qmath.h"
 #include "Eigen/Core"
+#include <Eigen/Dense>
 #include "opencv2/core/core.hpp"
 #include "opencv2/opencv.hpp"
 
@@ -19,20 +20,22 @@ public:
     FaceShape ();
     FaceShape (const cv::Mat &image, const vector<cv::KeyPoint> &landmarks);
 
-private:
-    cv::Rect checkBorders(cv::Rect cutBox);
-
-public:
-    void normalizeFace(cv::Size size);
+    void resizeFace(const cv::Size &size);
+    void resizeImage(const cv::Size &size);
+    void resizeLandmarks(const cv::Size &size);
+    void scalingLandmarks(const float kx, const float ky);
     void cutFace(const cv::Rect &cutBox);
     void drawLandmarks(const cv::Scalar &color);
-    void transformLandmarks(MatrixXf transform);
+    void transformLandmarks(const MatrixXf &transform);
     void transformLandmarks(const float x, const float y);
-    void drawLandmarks(const cv::Scalar &color, const vector<cv::KeyPoint> landmarks);
+    void drawLandmarks(const cv::Scalar &color, const vector<cv::KeyPoint> &landmarks);
     void setLandmarks(const MatrixXf &landmarksMat);
 
-public:
     MatrixXf getMatrixOfMarks() const;
+    static vector<cv::KeyPoint> convertVectorToLandmark(const VectorXf &vectorLandmarks);
+
+private:
+    cv::Rect checkBorders(cv::Rect cutBox) const;
 
 };
 #endif // FACESHAPE_H

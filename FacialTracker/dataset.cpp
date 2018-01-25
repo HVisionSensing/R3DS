@@ -8,7 +8,15 @@ DataSet::DataSet(vector<FaceShape> dataSet)
 
 
 
-vector<vector<cv::KeyPoint>> DataSet::getLandmarksOfSet() const
+DataSet::~DataSet()
+{
+    dataSet.clear();
+    dataSet.shrink_to_fit();
+}
+
+
+
+vector<vector<cv::KeyPoint>> DataSet::getLandmarksVector() const
 {
     vector<vector<cv::KeyPoint>> landmarksOfSet;
     for (int indFace = 0; indFace < dataSet.size(); indFace++)
@@ -19,10 +27,34 @@ vector<vector<cv::KeyPoint>> DataSet::getLandmarksOfSet() const
 
 
 
-void DataSet::normalizeFaces(cv::Size size)
+void DataSet::resizeFaces(const cv::Size &size)
 {
     for (int indFace = 0; indFace < dataSet.size(); indFace++)
-        dataSet[indFace].normalizeFace(size);
+        dataSet[indFace].resizeFace(size);
+}
+
+
+
+void DataSet::resizeImages(const cv::Size &size)
+{
+    for (int indFace = 0; indFace < dataSet.size(); indFace++)
+        dataSet[indFace].resizeImage(size);
+}
+
+
+
+void DataSet::resizeLandmarks(const cv::Size &size)
+{
+    for (int indFace = 0; indFace < dataSet.size(); indFace++)
+        dataSet[indFace].resizeLandmarks(size);
+}
+
+
+
+void DataSet::scalingLandmarks(const float kx, const float ky)
+{
+    for (int indFace = 0; indFace < dataSet.size(); indFace++)
+        dataSet[indFace].scalingLandmarks(kx, ky);
 }
 
 
@@ -35,15 +67,15 @@ void DataSet::drawLandmarks(const cv::Scalar &color)
 
 
 
-void DataSet::drawLandmarks(const cv::Scalar &color, const vector<vector<cv::KeyPoint> > landmarksOfSet)
+void DataSet::drawLandmarks(const cv::Scalar &color, const vector<vector<cv::KeyPoint> > &landmarksOfSet)
 {
-    for (int indFace = 0; indFace < dataSet.size(); indFace++)
+    for (int indFace = 0; indFace < landmarksOfSet.size(); indFace++)
         dataSet[indFace].drawLandmarks(color, landmarksOfSet[indFace]);
 }
 
 
 
-void DataSet::transformLandmarks(MatrixXf transform)
+void DataSet::transformLandmarks(const MatrixXf &transform)
 {
     for (int indFace = 0; indFace < dataSet.size(); indFace++)
         dataSet[indFace].transformLandmarks(transform.row(indFace));
@@ -51,23 +83,54 @@ void DataSet::transformLandmarks(MatrixXf transform)
 
 
 
-void DataSet::setLandmarks(const MatrixXf &landmarksMat)
+void DataSet::transformLandmarks(const float x, const float y)
 {
     for (int indFace = 0; indFace < dataSet.size(); indFace++)
-        dataSet[indFace].setLandmarks(landmarksMat.row(indFace));
+        dataSet[indFace].transformLandmarks(x, y);
 }
 
 
 
-MatrixXf DataSet::getMatrixOfMarks() const
+void DataSet::setLandmarks(const MatrixXf &landmarks)
+{
+    for (int indFace = 0; indFace < dataSet.size(); indFace++)
+        dataSet[indFace].setLandmarks(landmarks.row(indFace));
+}
+
+
+
+cv::Size DataSet::getArgSize() const
+{
+    int countShape = dataSet.size();
+    vector<int> width;
+    vector<int> height;
+
+    for (int indFace = 0; indFace < countShape; indFace++){
+        width.push_back(dataSet[indFace].image.cols);
+        height.push_back(dataSet[indFace].image.rows);
+    }
+
+    sort(width.begin(), width.end());
+    sort(height.begin(), height.end());
+
+    int midWidth = width[width.size()/2];
+    int midHeight = height[height.size()/2];
+    cv::Size size(midWidth, midHeight);
+
+    return size;
+}
+
+
+
+MatrixXf DataSet::getLandmarksMatrix() const
 {
     int countMarks = 68;
     int countFaces = dataSet.size();
-    MatrixXf matrixOfMarks(countFaces, 2*countMarks);
+    MatrixXf landmarksMatrix(countFaces, 2*countMarks);
 
     for (int indFace = 0; indFace < dataSet.size(); indFace++)
-        matrixOfMarks.block(indFace, 0, 1, 2*countMarks) = dataSet.at(indFace).getMatrixOfMarks();
+        landmarksMatrix.block(indFace, 0, 1, 2*countMarks) = dataSet.at(indFace).getMatrixOfMarks();
 
-    return matrixOfMarks;
+    return landmarksMatrix;
 }
 

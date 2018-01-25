@@ -17,7 +17,7 @@ FaceShape::FaceShape(const cv::Mat &image, const vector<cv::KeyPoint> &landmarks
 
 
 
-cv::Rect FaceShape::checkBorders(cv::Rect cutBox)
+cv::Rect FaceShape::checkBorders(cv::Rect cutBox) const
 {
     if (cutBox.x < 0){
         cutBox.width -= qFabs(cutBox.x);
@@ -39,7 +39,24 @@ cv::Rect FaceShape::checkBorders(cv::Rect cutBox)
 
 
 
-void FaceShape::normalizeFace(cv::Size size)
+void FaceShape::resizeFace(const cv::Size &size)
+{
+    resizeLandmarks(size);
+    resizeImage(size);
+}
+
+
+
+void FaceShape::resizeImage(const cv::Size &size)
+{
+    cv::Mat normalizedImg;
+    cv::resize(image, normalizedImg, size);
+    image = normalizedImg;
+}
+
+
+
+void FaceShape::resizeLandmarks(const cv::Size &size)
 {
     float widthNew = size.width;
     float widthOld = image.cols;
@@ -49,12 +66,16 @@ void FaceShape::normalizeFace(cv::Size size)
     float kWidth = widthNew / widthOld;
     float kHight = heightNew / heightOld;
 
-    cv::Mat normalizedImg;
-    cv::resize(image, normalizedImg, size);
-    image = normalizedImg;
+    scalingLandmarks(kWidth, kHight);
+}
+
+
+
+void FaceShape::scalingLandmarks(const float kx, const float ky)
+{
     for (int indexMark = 0; indexMark < landmarks.size(); indexMark++){
-        landmarks[indexMark].pt.x *= kWidth;
-        landmarks[indexMark].pt.y *= kHight;
+        landmarks[indexMark].pt.x *= kx;
+        landmarks[indexMark].pt.y *= ky;
     }
 }
 
@@ -70,7 +91,7 @@ void FaceShape::transformLandmarks(const float x, const float y)
 
 
 
-void FaceShape::transformLandmarks(MatrixXf transform)
+void FaceShape::transformLandmarks(const MatrixXf &transform)
 {
     for (int indMark = 0, indMarkAxis = 0; indMark < landmarks.size(); indMark++){
         landmarks[indMark].pt.x += transform(0, indMarkAxis++);
@@ -103,38 +124,39 @@ void FaceShape::drawLandmarks(const cv::Scalar &color)
 
 
 
-void FaceShape::drawLandmarks(const cv::Scalar &color, const vector<cv::KeyPoint> landmarks)
+void FaceShape::drawLandmarks(const cv::Scalar &color, const vector<cv::KeyPoint> &landmarks)
 {
     for (int indMark = 0; indMark < landmarks.size(); indMark++){
         cv::Point pt(landmarks.at(indMark).pt.x-0.7, landmarks.at(indMark).pt.y-0.7);
-        cv::circle(image, pt, 2, color, -1, 8, 0);
-        if (indMark+1 == landmarks.size()+1)
-            break;
-        if (indMark+1 == 17 || indMark+1 == 22 || indMark+1 == 27 || indMark+1 == 31 || indMark+1 == 36)
-            continue;
-        if (indMark == 41){
-            cv::Point pt2(landmarks.at(36).pt.x-0.7, landmarks.at(36).pt.y-0.7);
-            cv::line(image, pt, pt2, color);
-            continue;
-        }
-        if (indMark == 47){
-            cv::Point pt2(landmarks.at(42).pt.x-0.7, landmarks.at(42).pt.y-0.7);
-            cv::line(image, pt, pt2, color);
-            continue;
-        }
-        if (indMark == 59){
-            cv::Point pt2(landmarks.at(48).pt.x-0.7, landmarks.at(48).pt.y-0.7);
-            cv::line(image, pt, pt2, color);
-            continue;
-        }
-        if (indMark == 67){
-            cv::Point pt2(landmarks.at(60).pt.x-0.7, landmarks.at(60).pt.y-0.7);
-            cv::line(image, pt, pt2, color);
-            continue;
-        }
+                cv::circle(image, pt, 2, color, -1, 8, 0);
+                if (indMark+1 == landmarks.size()+1)
+                    break;
+                if (indMark+1 == 17 || indMark+1 == 22 || indMark+1 == 27 || indMark+1 == 31 || indMark+1 == 36)
+                    continue;
+                if (indMark == 41){
+                    cv::Point pt2(landmarks.at(36).pt.x-0.7, landmarks.at(36).pt.y-0.7);
+                    cv::line(image, pt, pt2, color);
+                    continue;
+                }
+                if (indMark == 47){
+                    cv::Point pt2(landmarks.at(42).pt.x-0.7, landmarks.at(42).pt.y-0.7);
+                    cv::line(image, pt, pt2, color);
+                    continue;
+                }
+                if (indMark == 59){
+                    cv::Point pt2(landmarks.at(48).pt.x-0.7, landmarks.at(48).pt.y-0.7);
+                    cv::line(image, pt, pt2, color);
+                    continue;
+                }
+                if (indMark == 67){
+                    cv::Point pt2(landmarks.at(60).pt.x-0.7, landmarks.at(60).pt.y-0.7);
+                    cv::line(image, pt, pt2, color);
+                    continue;
+                }
 
-        cv::Point pt2(landmarks.at(indMark+1).pt.x-0.7, landmarks.at(indMark+1).pt.y-0.7);
+                cv::Point pt2(landmarks.at(indMark+1).pt.x-0.7, landmarks.at(indMark+1).pt.y-0.7);
         cv::line(image, pt, pt2, color);
+
     }
 }
 
@@ -161,4 +183,17 @@ MatrixXf FaceShape::getMatrixOfMarks() const
     }
 
     return marksOfFace;
+}
+
+
+
+vector<cv::KeyPoint> FaceShape::convertVectorToLandmark(const VectorXf &vectorLandmarks)
+{
+    vector<cv::KeyPoint> marks;
+    for (int indMark = 0, indMarkAxis = 0; indMark < vectorLandmarks.rows()/2; indMark++){
+        int x = indMarkAxis++;
+        int y = indMarkAxis++;
+        marks.push_back(cv::KeyPoint(vectorLandmarks(x, 0), vectorLandmarks(y, 0), 32));
+    }
+    return marks;
 }

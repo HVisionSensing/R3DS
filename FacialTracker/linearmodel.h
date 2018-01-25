@@ -20,10 +20,9 @@ class LinearModel
 {
 public:
     virtual void deleteParams() = 0;
-    virtual void setParams(vector<MatrixXf> params) = 0;
+    virtual void setParams(const vector<MatrixXf> &params) = 0;
     virtual void fit(const MatrixXf &x, const MatrixXf &y) = 0;
 
-public:
     virtual vector<MatrixXf> getParams() const = 0;
     virtual MatrixXf predict(const MatrixXf &x) const = 0;
 };
@@ -32,18 +31,17 @@ public:
 
 class LinearRegression : public LinearModel
 {
-private:
-    vector<MatrixXf> params;
-
 public:
     LinearRegression();
     void deleteParams() override;
-    void setParams(const vector<MatrixXf> params) override;
+    void setParams(const vector<MatrixXf> &params) override;
     void fit(const MatrixXf &x, const MatrixXf &y) override;
 
-public:
     vector<MatrixXf> getParams() const override;
     MatrixXf predict(const MatrixXf &x) const override;
+
+private:
+    vector<MatrixXf> params;
 };
 
 #endif // LINEARREGRESSION_H

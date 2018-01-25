@@ -16,7 +16,7 @@ void LinearRegression::deleteParams()
 
 
 
-void LinearRegression::setParams(const vector<MatrixXf> params)
+void LinearRegression::setParams(const vector<MatrixXf> &params)
 {
     this->params = params;
 }
@@ -41,7 +41,7 @@ void LinearRegression::fit(const MatrixXf &x, const MatrixXf &y)
 
     timer.start();
     MatrixXf aTranspose = a.transpose();
-    MatrixXf decomposMat = aTranspose * a;
+    MatrixXf decomposMat = aTranspose * a;// + MatrixXf::Identity(a.cols(), a.cols()) * 0.0001;
     qDebug() << "Times a.transpose * a = " << timer.elapsed()/1000.0;
 
     timer.start();

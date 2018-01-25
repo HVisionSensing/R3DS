@@ -8,19 +8,21 @@ class DataSet
 public:
     vector<FaceShape> dataSet;
     DataSet(vector<FaceShape> dataSet);
+    ~DataSet();
 
-public:
-    void normalizeFaces(cv::Size size);
+    void resizeFaces(const cv::Size &size);
+    void resizeImages(const cv::Size &size);
+    void resizeLandmarks(const cv::Size &size);
+    void scalingLandmarks(const float kx, const float ky);
     void drawLandmarks(const cv::Scalar &color);
-    void drawLandmarks(const cv::Scalar &color, const vector<vector<cv::KeyPoint>> landmarksOfSet);
-    void transformLandmarks(MatrixXf transform);
-    void setLandmarks(const MatrixXf &landmarksMat);
+    void drawLandmarks(const cv::Scalar &color, const vector<vector<cv::KeyPoint>> &landmarksOfSet);
+    void transformLandmarks(const MatrixXf &transform);
+    void transformLandmarks(const float x, const float y);
+    void setLandmarks(const MatrixXf &landmarks);
 
-public:
-    MatrixXf getMatrixOfMarks() const;
-
-public:
-    vector<vector<cv::KeyPoint>> getLandmarksOfSet() const;
+    cv::Size getArgSize() const;
+    MatrixXf getLandmarksMatrix() const;
+    vector<vector<cv::KeyPoint>> getLandmarksVector() const;
 
 };
 #endif // DATASET_H
