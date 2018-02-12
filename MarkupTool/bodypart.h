@@ -15,8 +15,6 @@ public:
     void addPoint (Landmark* point, int indInsert);
     void loadPoint (Landmark* point, int indInsert);
 
-    QString nameBlock;
-
 };
 
 #endif // BLOCK_H

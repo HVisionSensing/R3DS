@@ -14,10 +14,10 @@
 namespace LoaderJson
 {
     void saveJson(const QJsonDocument &doc, const QString &fileName);
-    QJsonDocument createJson(const BodyParts &body);
+    QJsonDocument createJson(const Body &body);
     QJsonDocument loadJson(const QString &fileName);
     QVector<QPointF> getPoints(const QJsonArray &array);
-    BodyParts getBodyParts(const QJsonDocument &doc);
+    Body getBodyParts(const QJsonDocument &doc);
     QJsonArray getArray(const QVector<QPointF> &points);
 }
 

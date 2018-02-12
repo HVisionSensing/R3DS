@@ -1,9 +1,9 @@
-#include "block.h"
+#include "bodypart.h"
 
 
 BodyPart::BodyPart(QString nameBlock)
 {
-    this->nameBlock = nameBlock;
+    //this->nameBlock = nameBlock;
 }
 
 void BodyPart::addPoint(Landmark *point, int indInsert)

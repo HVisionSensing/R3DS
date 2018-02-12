@@ -4,19 +4,20 @@
 #include "QPointF"
 #include "QVector"
 
-struct BodyParts
+struct Part
 {
-    QVector<QPointF> leftEyeCorner;
-    QVector<QPointF> leftEyeUp;
-    QVector<QPointF> leftEyeDown;
+    QVector<QPointF> corner;
+    QVector<QPointF> up;
+    QVector<QPointF> down;
 
-    QVector<QPointF> rightEyeCorner;
-    QVector<QPointF> rightEyeUp;
-    QVector<QPointF> rightEyeDown;
+    QString name;
+};
 
-    QVector<QPointF> mouthCorner;
-    QVector<QPointF> mouthUp;
-    QVector<QPointF> mouthDown;
+struct Body
+{
+    Part leftEye;
+    Part rightEye;
+    Part mouth;
 };
 
 #endif // BODYPARTS_H

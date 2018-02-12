@@ -30,15 +30,15 @@ SOURCES += \
     markupview.cpp \
     landmark.cpp \
     loaderjson.cpp \
-    block.cpp
+    bodypart.cpp
 
 HEADERS += \
         markupwindow.h \
     markupview.h \
     landmark.h \
     loaderjson.h \
-    block.h \
-    bodyparts.h
+    bodyparts.h \
+    bodypart.h
 
 FORMS += \
         markupwindow.ui

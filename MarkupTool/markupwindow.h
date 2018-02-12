@@ -26,6 +26,8 @@ public:
     void showImage(const QString &nameImage);
     void clearAll();
     void clear();
+    void save();
+    void loadShape(QString path);
 
 private slots:
     void on_actionLoad_images_triggered();
@@ -45,6 +47,7 @@ private:
     Ui::MarkupWindow *ui = nullptr;
     QStringList imagesPaths;
     int indOpenedFile = -1;
+    int indPart = 0;
 };
 
 #endif // MARKUPWINDOW_H

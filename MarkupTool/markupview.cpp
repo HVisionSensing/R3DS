@@ -4,8 +4,8 @@
 
 MarkupView::MarkupView(QWidget *parent) : QGraphicsView(parent)
 {
-    BodyPart *leftEye = new BodyPart("Left Eye");
-    BodyPart *rightEye = new BodyPart("Right Eye");
+    BodyPart *leftEye = new BodyPart("LeftEye");
+    BodyPart *rightEye = new BodyPart("RightEye");
     BodyPart *mouth = new BodyPart("mouth");
     blocks.push_back(leftEye);
     blocks.push_back(rightEye);
@@ -63,7 +63,7 @@ void MarkupView::updatePart()
 
 
 
-void MarkupView::updateBlocks(BodyParts blks)
+void MarkupView::updateBlocks(Body blks)
 {
     clearScene();
     blocks.clear();
@@ -77,98 +77,102 @@ void MarkupView::updateBlocks(BodyParts blks)
 
     // TODO О БОЖЕ КАКОЕ ТУТ ГОВНО
     int indLeftEye = 0;
-    Landmark *landmark = new Landmark(blks.leftEyeCorner[0].x()-0.25, blks.leftEyeCorner[0].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark->start = true;
-    connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    leftEyeBlock->loadPoint(landmark, indLeftEye);
-
-    for (int indPointUp = 0; indPointUp < blks.leftEyeUp.size(); indPointUp++){
-        indLeftEye++;
-        Landmark *landmark = new Landmark(blks.leftEyeUp[indPointUp].x()-0.25, blks.leftEyeUp[indPointUp].y()-0.25, 0.5, 0.5, indLeftEye);
+    if (blks.leftEye.corner.size() > 0){
+        Landmark *landmark = new Landmark(blks.leftEye.corner[0].x()-0, blks.leftEye.corner[0].y()-0, 0.5, 0.5, indLeftEye);
+        landmark->start = true;
         connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
         leftEyeBlock->loadPoint(landmark, indLeftEye);
-    }
-    indLeftEye++;
-    Landmark *landmark2 = new Landmark(blks.leftEyeCorner[1].x()-0.25, blks.leftEyeCorner[1].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark2->end = true;
-    connect(landmark2, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    leftEyeBlock->loadPoint(landmark2, indLeftEye);
 
-    for (int indPointDown = 0; indPointDown < blks.leftEyeDown.size(); indPointDown++){
+        for (int indPointUp = 0; indPointUp < blks.leftEye.up.size(); indPointUp++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.leftEye.up[indPointUp].x()-0, blks.leftEye.up[indPointUp].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            leftEyeBlock->loadPoint(landmark, indLeftEye);
+        }
         indLeftEye++;
-        Landmark *landmark = new Landmark(blks.leftEyeDown[indPointDown].x()-0.25, blks.leftEyeDown[indPointDown].y()-0.25, 0.5, 0.5, indLeftEye);
-        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-        leftEyeBlock->loadPoint(landmark, indLeftEye);
-    }
+        Landmark *landmark2 = new Landmark(blks.leftEye.corner[1].x()-0, blks.leftEye.corner[1].y()-0, 0.5, 0.5, indLeftEye);
+        landmark2->end = true;
+        connect(landmark2, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        leftEyeBlock->loadPoint(landmark2, indLeftEye);
 
+        for (int indPointDown = 0; indPointDown < blks.leftEye.down.size(); indPointDown++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.leftEye.down[indPointDown].x()-0, blks.leftEye.down[indPointDown].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            leftEyeBlock->loadPoint(landmark, indLeftEye);
+        }
+    }
     // ИСПРАВИТЬ БЕЗВОЗРАЖЕНИЙ
 
     indLeftEye = 0;
-    Landmark *landmark3 = new Landmark(blks.rightEyeCorner[0].x()-0.25, blks.rightEyeCorner[0].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark3->start = true;
-    connect(landmark3, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    rightEyeBlock->loadPoint(landmark3, indLeftEye);
+    if (blks.rightEye.corner.size() > 0){
+        Landmark *landmark3 = new Landmark(blks.rightEye.corner[0].x()-0, blks.rightEye.corner[0].y()-0, 0.5, 0.5, indLeftEye);
+        landmark3->start = true;
+        connect(landmark3, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        rightEyeBlock->loadPoint(landmark3, indLeftEye);
 
-    for (int indPointUp = 0; indPointUp < blks.rightEyeUp.size(); indPointUp++){
+        for (int indPointUp = 0; indPointUp < blks.rightEye.up.size(); indPointUp++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.rightEye.up[indPointUp].x()-0, blks.rightEye.up[indPointUp].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            rightEyeBlock->loadPoint(landmark, indLeftEye);
+        }
         indLeftEye++;
-        Landmark *landmark = new Landmark(blks.rightEyeUp[indPointUp].x()-0.25, blks.rightEyeUp[indPointUp].y()-0.25, 0.5, 0.5, indLeftEye);
-        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-        rightEyeBlock->loadPoint(landmark, indLeftEye);
-    }
-    indLeftEye++;
-    Landmark *landmark4 = new Landmark(blks.rightEyeCorner[1].x()-0.25, blks.rightEyeCorner[1].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark4->end = true;
-    connect(landmark4, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    rightEyeBlock->loadPoint(landmark4, indLeftEye);
+        Landmark *landmark4 = new Landmark(blks.rightEye.corner[1].x()-0, blks.rightEye.corner[1].y()-0, 0.5, 0.5, indLeftEye);
+        landmark4->end = true;
+        connect(landmark4, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        rightEyeBlock->loadPoint(landmark4, indLeftEye);
 
-    for (int indPointDown = 0; indPointDown < blks.rightEyeDown.size(); indPointDown++){
-        indLeftEye++;
-        Landmark *landmark = new Landmark(blks.rightEyeDown[indPointDown].x()-0.25, blks.rightEyeDown[indPointDown].y()-0.25, 0.5, 0.5, indLeftEye);
-        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-        rightEyeBlock->loadPoint(landmark, indLeftEye);
+        for (int indPointDown = 0; indPointDown < blks.rightEye.down.size(); indPointDown++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.rightEye.down[indPointDown].x()-0, blks.rightEye.down[indPointDown].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            rightEyeBlock->loadPoint(landmark, indLeftEye);
+        }
     }
-
     // ИСПРАВИТЬ БЕЗВОЗРАЖЕНИЙ
 
     indLeftEye = 0;
-    Landmark *landmark5 = new Landmark(blks.mouthCorner[0].x()-0.25, blks.mouthCorner[0].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark5->start = true;
-    connect(landmark5, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    mouthBlock->loadPoint(landmark5, indLeftEye);
+    if (blks.mouth.corner.size() > 0){
+        Landmark *landmark5 = new Landmark(blks.mouth.corner[0].x()-0, blks.mouth.corner[0].y()-0, 0.5, 0.5, indLeftEye);
+        landmark5->start = true;
+        connect(landmark5, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        mouthBlock->loadPoint(landmark5, indLeftEye);
 
-    for (int indPointUp = 0; indPointUp < blks.mouthUp.size(); indPointUp++){
+        for (int indPointUp = 0; indPointUp < blks.mouth.up.size(); indPointUp++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.mouth.up[indPointUp].x()-0, blks.mouth.up[indPointUp].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            mouthBlock->loadPoint(landmark, indLeftEye);
+        }
         indLeftEye++;
-        Landmark *landmark = new Landmark(blks.mouthUp[indPointUp].x()-0.25, blks.mouthUp[indPointUp].y()-0.25, 0.5, 0.5, indLeftEye);
-        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-        mouthBlock->loadPoint(landmark, indLeftEye);
-    }
-    indLeftEye++;
-    Landmark *landmark6 = new Landmark(blks.mouthCorner[1].x()-0.25, blks.mouthCorner[1].y()-0.25, 0.5, 0.5, indLeftEye);
-    landmark6->end = true;
-    connect(landmark6, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-    mouthBlock->loadPoint(landmark6, indLeftEye);
+        Landmark *landmark6 = new Landmark(blks.mouth.corner[1].x()-0, blks.mouth.corner[1].y()-0, 0.5, 0.5, indLeftEye);
+        landmark6->end = true;
+        connect(landmark6, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        mouthBlock->loadPoint(landmark6, indLeftEye);
 
-    for (int indPointDown = 0; indPointDown < blks.mouthDown.size(); indPointDown++){
-        indLeftEye++;
-        Landmark *landmark = new Landmark(blks.mouthDown[indPointDown].x()-0.25, blks.mouthDown[indPointDown].y()-0.25, 0.5, 0.5, indLeftEye);
-        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
-        mouthBlock->loadPoint(landmark, indLeftEye);
+        for (int indPointDown = 0; indPointDown < blks.mouth.down.size(); indPointDown++){
+            indLeftEye++;
+            Landmark *landmark = new Landmark(blks.mouth.down[indPointDown].x()-0, blks.mouth.down[indPointDown].y()-0, 0.5, 0.5, indLeftEye);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            mouthBlock->loadPoint(landmark, indLeftEye);
+        }
     }
     /*
     for (int indPoint = 0; indPoint < blks.leftEye.size();indPoint++){
-        Landmark *landmark = new Landmark(blks.leftEye[indPoint].x()-0.25, blks.leftEye[indPoint].y()-0.25, 0.5, 0.5, indPoint);
+        Landmark *landmark = new Landmark(blks.leftEye[indPoint].x()-0, blks.leftEye[indPoint].y()-0, 0.5, 0.5, indPoint);
         connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
         leftEyeBlock->addPoint(landmark, indPoint);
     }
 
     for (int indPoint = 0; indPoint < blks.rightEye.size();indPoint++){
-        Landmark *landmark = new Landmark(blks.rightEye[indPoint].x()-0.25, blks.rightEye[indPoint].y()-0.25, 0.5, 0.5, indPoint);
+        Landmark *landmark = new Landmark(blks.rightEye[indPoint].x()-0, blks.rightEye[indPoint].y()-0, 0.5, 0.5, indPoint);
         connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
         rightEyeBlock->addPoint(landmark, indPoint);
     }
 
     for (int indPoint = 0; indPoint < blks.mouth.size();indPoint++){
-        Landmark *landmark = new Landmark(blks.mouth[indPoint].x()-0.25, blks.mouth[indPoint].y()-0.25, 0.5, 0.5, indPoint);
+        Landmark *landmark = new Landmark(blks.mouth[indPoint].x()-0, blks.mouth[indPoint].y()-0, 0.5, 0.5, indPoint);
         connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
         mouthBlock->addPoint(landmark, indPoint);
     }
@@ -329,7 +333,7 @@ void MarkupView::mousePressEvent(QMouseEvent *event)
         return;
 
     QPointF position = mapToScene(event->pos());
-    Landmark *landmark = new Landmark(position.x()-0.25, position.y()-0.25, 0.5, 0.5, 0);
+    Landmark *landmark = new Landmark(position.x()-0, position.y()-0, 0.5, 0.5, 0);
     connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
     addPointInPart(landmark);
     scene->addItem(landmark);
