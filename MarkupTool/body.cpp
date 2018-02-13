@@ -1,12 +1,7 @@
-#include "bodypart.h"
+#include "body.h"
 
 
-BodyPart::BodyPart(QString nameBlock)
-{
-    //this->nameBlock = nameBlock;
-}
-
-void BodyPart::addPoint(Landmark *point, int indInsert)
+void Part::addPoint(Landmark *point, int indInsert)
 {
     points.insert(indInsert, point);
 
@@ -18,10 +13,23 @@ void BodyPart::addPoint(Landmark *point, int indInsert)
         points[indPoint]->indPoint = indPoint;
 }
 
-void BodyPart::loadPoint(Landmark *point, int indInsert)
+
+void Part::loadPoint(Landmark *point, int indInsert)
 {
     points.insert(indInsert, point);
 
     for (int indPoint = indInsert; indPoint < points.size();indPoint++)
         points[indPoint]->indPoint = indPoint;
+}
+
+
+Body::Body()
+{
+    Part leftEye;
+    Part rightEye;
+    Part mouth;
+
+    parts.push_back(leftEye);
+    parts.push_back(rightEye);
+    parts.push_back(mouth);
 }

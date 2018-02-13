@@ -62,17 +62,11 @@ void MarkupWindow::save()
     QString imagePath = imagesPaths[indOpenedFile];
 
     Body body;
-    body.leftEye.corner = ui->graphicsView->getCorner(0);
-    body.leftEye.up = ui->graphicsView->getUpPart(0);
-    body.leftEye.down = ui->graphicsView->getDownPart(0);
-
-    body.rightEye.corner = ui->graphicsView->getCorner(1);
-    body.rightEye.up = ui->graphicsView->getUpPart(1);
-    body.rightEye.down = ui->graphicsView->getDownPart(1);
-
-    body.mouth.corner = ui->graphicsView->getCorner(2);
-    body.mouth.up = ui->graphicsView->getUpPart(2);
-    body.mouth.down = ui->graphicsView->getDownPart(2);
+    for (int indPart = 0; indPart < body.parts.size(); indPart++){
+        body.parts[indPart].corner = ui->graphicsView->getCorner(indPart);
+        body.parts[indPart].up = ui->graphicsView->getUpPart(indPart);
+        body.parts[indPart].down = ui->graphicsView->getDownPart(indPart);
+    }
 
     QJsonDocument doc = LoaderJson::createJson(body);
     imagePath.remove(imagePath.size()-3, 3);

@@ -4,14 +4,6 @@
 
 MarkupView::MarkupView(QWidget *parent) : QGraphicsView(parent)
 {
-    BodyPart *leftEye = new BodyPart("LeftEye");
-    BodyPart *rightEye = new BodyPart("RightEye");
-    BodyPart *mouth = new BodyPart("mouth");
-    blocks.push_back(leftEye);
-    blocks.push_back(rightEye);
-    blocks.push_back(mouth);
-
-    block = leftEye;
     scene = new QGraphicsScene();
     this->setScene(scene);
     this->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing);
@@ -31,8 +23,8 @@ void MarkupView::drawImage(const QImage &image)
 
 void MarkupView::updateBodyPart()
 {
-    for (int indPoint = 0; indPoint < block->points.size();indPoint++)
-        scene->addItem(block->points[indPoint]);
+    for (int indPoint = 0; indPoint < body->parts[body->indActived].points.size();indPoint++)
+        scene->addItem(body->parts[body->indActived].points[indPoint]);
     updatePart();
 }
 
@@ -40,41 +32,66 @@ void MarkupView::updateBodyPart()
 
 void MarkupView::clearScene()
 {
-    scene->removeItem(block->path);
-    for (int indItem = 0; indItem < block->points.size(); indItem++)
-        scene->removeItem(block->points[indItem]);
+    scene->removeItem(body->parts[body->indActived].path);
+    for (int indItem = 0; indItem < body->parts[body->indActived].points.size(); indItem++)
+        scene->removeItem(body->parts[body->indActived].points[indItem]);
 }
 
 
 
 void MarkupView::updatePart()
 {
-    if (block->points.size() < 4)
+    if (body->parts[body->indActived].points.size() < 4)
         return;
-    scene->removeItem(block->path);
-    QPainterPath pathLeftEye(block->points[0]->scenePos());
-    for (int indLeftEye = 1; indLeftEye < block->points.size(); indLeftEye++)
-        pathLeftEye.lineTo(block->points[indLeftEye]->scenePos());
-    pathLeftEye.lineTo(block->points[0]->scenePos());
-    block->path = new QGraphicsPathItem(pathLeftEye);
-    block->path->setPen(QPen(Qt::red));
-    scene->addItem(block->path);
+    scene->removeItem(body->parts[body->indActived].path);
+    QPainterPath pathLeftEye(body->parts[body->indActived].points[0]->scenePos());
+    for (int indLeftEye = 1; indLeftEye < body->parts[body->indActived].points.size(); indLeftEye++)
+        pathLeftEye.lineTo(body->parts[body->indActived].points[indLeftEye]->scenePos());
+    pathLeftEye.lineTo(body->parts[body->indActived].points[0]->scenePos());
+    body->parts[body->indActived].path = new QGraphicsPathItem(pathLeftEye);
+    body->parts[body->indActived].path->setPen(QPen(Qt::red));
+    scene->addItem(body->parts[body->indActived].path);
 }
 
 
 
-void MarkupView::updateBlocks(Body blks)
+void MarkupView::updateBlocks(Body newBody)
 {
     clearScene();
-    blocks.clear();
+    body = new Body();
 
-    BodyPart *leftEyeBlock = new BodyPart("Left Eye");
-    BodyPart *rightEyeBlock = new BodyPart("Right Eye");
-    BodyPart *mouthBlock= new BodyPart("mouth");
-    blocks.push_back(leftEyeBlock);
-    blocks.push_back(rightEyeBlock);
-    blocks.push_back(mouthBlock);
+    // Всё ровно это все еще говно, как и куча кода до этого, вот нахера я торопился?!
 
+    for (int indPart = 0; indPart < newBody.parts.size(); indPart++){
+        int indPoint = 0;
+        if (newBody.parts[indPart].corner.size() == 0)
+            continue;
+        Landmark *landmark = new Landmark(newBody.parts[indPart].corner[indPoint].x()-0, newBody.parts[indPart].corner[indPoint].y()-0, 0.5, 0.5, indPoint);
+        landmark->start = true;
+        connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        body->parts[indPart].loadPoint(landmark, indPoint);
+
+        for (int indPointUp = 0; indPointUp < newBody.parts[indPart].up.size(); indPointUp++){
+            indPoint++;
+            Landmark *landmark = new Landmark(newBody.parts[indPart].up[indPointUp].x()-0, newBody.parts[indPart].up[indPointUp].y()-0, 0.5, 0.5, indPoint);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            body->parts[indPart].loadPoint(landmark, indPoint);
+        }
+
+        indPoint++;
+        Landmark *landmark2 = new Landmark(newBody.parts[indPart].corner[1].x()-0, newBody.parts[indPart].corner[1].y()-0, 0.5, 0.5, indPoint);
+        landmark2->end = true;
+        connect(landmark2, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+        body->parts[indPart].loadPoint(landmark2, indPoint);
+
+        for (int indPointDown = 0; indPointDown < newBody.parts[indPart].down.size(); indPointDown++){
+            indPoint++;
+            Landmark *landmark = new Landmark(newBody.parts[indPart].down[indPointDown].x()-0, newBody.parts[indPart].down[indPointDown].y()-0, 0.5, 0.5, indPoint);
+            connect(landmark, SIGNAL(changePosition(QPointF)), this, SLOT(updatePart()));
+            body->parts[indPart].loadPoint(landmark, indPoint);
+        }
+    }
+    /*
     // TODO О БОЖЕ КАКОЕ ТУТ ГОВНО
     int indLeftEye = 0;
     if (blks.leftEye.corner.size() > 0){
@@ -177,7 +194,8 @@ void MarkupView::updateBlocks(Body blks)
         mouthBlock->addPoint(landmark, indPoint);
     }
     */
-    block = blocks[0];
+    //block = blocks[0];
+
     updateBodyPart();
 }
 
@@ -185,25 +203,25 @@ void MarkupView::updateBlocks(Body blks)
 
 void MarkupView::clearBodyPart()
 {
-    scene->removeItem(block->path);
-    for (int indItem = 0; indItem < block->points.size(); indItem++)
-        scene->removeItem(block->points[indItem]);
+    scene->removeItem(body->parts[body->indActived].path);
+    for (int indItem = 0; indItem < body->parts[body->indActived].points.size(); indItem++)
+        scene->removeItem(body->parts[body->indActived].points[indItem]);
 
-    block->path = nullptr;
-    block->points.clear();
+    body->parts[body->indActived].path = nullptr;
+    body->parts[body->indActived].points.clear();
 }
 
 
 
 void MarkupView::clearBodyParts()
 {
-    for (int indPart = 0; indPart < blocks.size(); indPart++){
-        scene->removeItem(blocks[indPart]->path);
-        for (int indItem = 0; indItem < blocks[indPart]->points.size(); indItem++)
-            scene->removeItem(blocks[indPart]->points[indItem]);
+    for (int indPart = 0; indPart < body->parts.size(); indPart++){
+        scene->removeItem(body->parts[indPart].path);
+        for (int indItem = 0; indItem < body->parts[indPart].points.size(); indItem++)
+            scene->removeItem(body->parts[indPart].points[indItem]);
 
-        blocks[indPart]->path = nullptr;
-        blocks[indPart]->points.clear();
+        body->parts[indPart].path = nullptr;
+        body->parts[indPart].points.clear();
     }
 }
 
@@ -212,8 +230,8 @@ void MarkupView::clearBodyParts()
 QVector<QPointF> MarkupView::getBodyPart(int indBlock) const
 {
     QVector<QPointF> leftEye;
-    for (int indPoint = 0; indPoint < blocks[indBlock]->points.size(); indPoint++)
-        leftEye.push_back(blocks[indBlock]->points[indPoint]->scenePos());
+    for (int indPoint = 0; indPoint < body->parts[indBlock].points.size(); indPoint++)
+        leftEye.push_back(body->parts[indBlock].points[indPoint]->scenePos());
     return leftEye;
 }
 
@@ -222,10 +240,10 @@ QVector<QPointF> MarkupView::getBodyPart(int indBlock) const
 QVector<QPointF> MarkupView::getUpPart(int indBLock) const
 {
     QVector<QPointF> upPart;
-    for (int indPoint = 1; indPoint < blocks[indBLock]->points.size(); indPoint++){
-        if (blocks[indBLock]->points[indPoint]->end == true)
+    for (int indPoint = 1; indPoint < body->parts[indBLock].points.size(); indPoint++){
+        if (body->parts[indBLock].points[indPoint]->end == true)
             break;
-        upPart.push_back(blocks[indBLock]->points[indPoint]->scenePos());
+        upPart.push_back(body->parts[indBLock].points[indPoint]->scenePos());
     }
     return upPart;
 }
@@ -237,14 +255,14 @@ QVector<QPointF> MarkupView::getDownPart(int indBLock) const
     QVector<QPointF> downPart;
 
     int indEnd;
-    for (int indPoint = 0; indPoint < blocks[indBLock]->points.size(); indPoint++)
-        if (blocks[indBLock]->points[indPoint]->end == true)
+    for (int indPoint = 0; indPoint < body->parts[indBLock].points.size(); indPoint++)
+        if (body->parts[indBLock].points[indPoint]->end == true)
             indEnd = indPoint;
 
-    for (int indPoint = indEnd+1; indPoint < blocks[indBLock]->points.size(); indPoint++){
-        if (blocks[indBLock]->points[indPoint]->start == true)
+    for (int indPoint = indEnd+1; indPoint < body->parts[indBLock].points.size(); indPoint++){
+        if (body->parts[indBLock].points[indPoint]->start == true)
             break;
-        downPart.push_back(blocks[indBLock]->points[indPoint]->scenePos());
+        downPart.push_back(body->parts[indBLock].points[indPoint]->scenePos());
     }
     return downPart;
 }
@@ -255,13 +273,13 @@ QVector<QPointF> MarkupView::getCorner(int indBLock) const
 {
     QVector<QPointF> corners;
 
-    for (int indPoint = 0; indPoint < blocks[indBLock]->points.size(); indPoint++)
-        if (blocks[indBLock]->points[indPoint]->start == true)
-            corners.push_back(blocks[indBLock]->points[indPoint]->scenePos());
+    for (int indPoint = 0; indPoint < body->parts[indBLock].points.size(); indPoint++)
+        if (body->parts[indBLock].points[indPoint]->start == true)
+            corners.push_back(body->parts[indBLock].points[indPoint]->scenePos());
 
-    for (int indPoint = 0; indPoint < blocks[indBLock]->points.size(); indPoint++)
-        if (blocks[indBLock]->points[indPoint]->end == true)
-            corners.push_back(blocks[indBLock]->points[indPoint]->scenePos());
+    for (int indPoint = 0; indPoint < body->parts[indBLock].points.size(); indPoint++)
+        if (body->parts[indBLock].points[indPoint]->end == true)
+            corners.push_back(body->parts[indBLock].points[indPoint]->scenePos());
 
     return corners;
 }
@@ -273,15 +291,15 @@ void MarkupView::addPointInPart(Landmark *landmark)
     float lineMin = 100000000;
     float indMin = 0;
 
-    for (int indPoint = 0; indPoint < block->points.size(); indPoint++){
+    for (int indPoint = 0; indPoint < body->parts[body->indActived].points.size(); indPoint++){
         int prev = indPoint;
         int next = indPoint+1;
-        if (next == block->points.size())
+        if (next == body->parts[body->indActived].points.size())
             next = 0;
-        float x1 = block->points[prev]->x();
-        float x2 = block->points[next]->x();
-        float y1 = block->points[prev]->y();
-        float y2 = block->points[next]->y();
+        float x1 = body->parts[body->indActived].points[prev]->x();
+        float x2 = body->parts[body->indActived].points[next]->x();
+        float y1 = body->parts[body->indActived].points[prev]->y();
+        float y2 = body->parts[body->indActived].points[next]->y();
         float x = landmark->x();
         float y = landmark->y();
         indInsert = prev+1;
@@ -295,12 +313,12 @@ void MarkupView::addPointInPart(Landmark *landmark)
         bool amongX = ((x1 < x) && (x < x2)) || ((x1 > x) && (x > x2));
         bool amongY = ((y1 > y) && (y >y2)) || ((y1 < y) && (y < y2));
         if (amongX && amongY){
-            block->addPoint(landmark, indPoint+1);
+            body->parts[body->indActived].addPoint(landmark, indPoint+1);
             return;
         }
     }
 
-    block->addPoint(landmark, indMin);
+    body->parts[body->indActived].addPoint(landmark, indMin);
 }
 
 
@@ -308,7 +326,7 @@ void MarkupView::addPointInPart(Landmark *landmark)
 void MarkupView::changeBodyPart(int indBlock)
 {
     clearScene();
-    block = blocks[indBlock];
+    body->indActived = indBlock;
     updateBodyPart();
 }
 

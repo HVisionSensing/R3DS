@@ -8,7 +8,7 @@
 
 #include "loaderjson.h"
 #include "markupview.h"
-#include "bodyparts.h"
+#include "body.h"
 
 namespace Ui {
 class MarkupWindow;

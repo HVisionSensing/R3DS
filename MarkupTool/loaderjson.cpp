@@ -11,17 +11,17 @@ void LoaderJson::saveJson(const QJsonDocument &doc, const QString &fileName)
 QJsonDocument LoaderJson::createJson(const Body &body)
 {
     QJsonObject obj;
-    QJsonArray leftEyeCornerArray = getArray(body.leftEye.corner);
-    QJsonArray leftEyeUpArray = getArray(body.leftEye.up);
-    QJsonArray leftEyeDownArray = getArray(body.leftEye.down);
+    QJsonArray leftEyeCornerArray = getArray(body.parts[0].corner);
+    QJsonArray leftEyeUpArray = getArray(body.parts[0].up);
+    QJsonArray leftEyeDownArray = getArray(body.parts[0].down);
 
-    QJsonArray rightEyeCornerArray = getArray(body.rightEye.corner);
-    QJsonArray rightEyeUpArray = getArray(body.rightEye.up);
-    QJsonArray rightEyeDownArray = getArray(body.rightEye.down);
+    QJsonArray rightEyeCornerArray = getArray(body.parts[1].corner);
+    QJsonArray rightEyeUpArray = getArray(body.parts[1].up);
+    QJsonArray rightEyeDownArray = getArray(body.parts[1].down);
 
-    QJsonArray mouthEyeCornerArray = getArray(body.mouth.corner);
-    QJsonArray mouthEyeUpArray = getArray(body.mouth.up);
-    QJsonArray mouthEyeDownArray = getArray(body.mouth.down);
+    QJsonArray mouthEyeCornerArray = getArray(body.parts[2].corner);
+    QJsonArray mouthEyeUpArray = getArray(body.parts[2].up);
+    QJsonArray mouthEyeDownArray = getArray(body.parts[2].down);
 
     obj.insert("LeftEyeCorners", leftEyeCornerArray);
     obj.insert("LeftEyeUp", leftEyeUpArray);
@@ -79,17 +79,17 @@ Body LoaderJson::getBodyParts(const QJsonDocument &doc)
     QJsonArray mouthEyeDownArray = obj.value("MouthDown").toArray();
 
     Body body;
-    body.leftEye.corner = LoaderJson::getPoints(leftEyeCornerArray);
-    body.leftEye.up = LoaderJson::getPoints(leftEyeUpArray);
-    body.leftEye.down = LoaderJson::getPoints(leftEyeDownArray);
+    body.parts[0].corner = LoaderJson::getPoints(leftEyeCornerArray);
+    body.parts[0].up = LoaderJson::getPoints(leftEyeUpArray);
+    body.parts[0].down = LoaderJson::getPoints(leftEyeDownArray);
 
-    body.rightEye.corner = LoaderJson::getPoints(rightEyeCornerArray);
-    body.rightEye.up = LoaderJson::getPoints(rightEyeUpArray);
-    body.rightEye.down = LoaderJson::getPoints(rightEyeDownArray);
+    body.parts[1].corner = LoaderJson::getPoints(rightEyeCornerArray);
+    body.parts[1].up = LoaderJson::getPoints(rightEyeUpArray);
+    body.parts[1].down = LoaderJson::getPoints(rightEyeDownArray);
 
-    body.mouth.corner = LoaderJson::getPoints(mouthEyeCornerArray);
-    body.mouth.up = LoaderJson::getPoints(mouthEyeUpArray);
-    body.mouth.down = LoaderJson::getPoints(mouthEyeDownArray);
+    body.parts[2].corner = LoaderJson::getPoints(mouthEyeCornerArray);
+    body.parts[2].up = LoaderJson::getPoints(mouthEyeUpArray);
+    body.parts[2].down = LoaderJson::getPoints(mouthEyeDownArray);
 
     return body;
 }

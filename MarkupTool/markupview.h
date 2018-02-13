@@ -7,8 +7,7 @@
 #include "QWheelEvent"
 #include "landmark.h"
 #include "cmath"
-#include "bodypart.h"
-#include "bodyparts.h"
+#include "body.h"
 
 class MarkupView : public QGraphicsView
 {
@@ -18,7 +17,7 @@ public:
 
     void drawImage(const QImage &image);
     void updateBodyPart();
-    void updateBlocks(Body blks);
+    void updateBlocks(Body newBody);
     void clearScene();
     void clearBodyPart();
     void clearBodyParts();
@@ -40,8 +39,7 @@ private:
     QGraphicsScene *scene = nullptr;
     QGraphicsItem *imageOpened = nullptr;
 
-    BodyPart *block = nullptr;
-    QVector<BodyPart*> blocks;
+    Body *body = new Body();
 };
 
 #endif // MARKUPVIEW_H

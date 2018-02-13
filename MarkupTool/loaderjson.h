@@ -9,7 +9,7 @@
 #include "QPointF"
 #include "QFile"
 
-#include "bodyparts.h"
+#include "body.h"
 
 namespace LoaderJson
 {
